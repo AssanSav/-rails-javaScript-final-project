@@ -5,6 +5,7 @@ class CommentsController < ApplicationController
   # GET /comments.json
   def index
     @comments = Comment.all
+    render json: CommentsController.new(@comment).serialized_json
   end
 
   # GET /comments/1

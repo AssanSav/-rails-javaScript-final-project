@@ -5,6 +5,7 @@ class RecipesController < ApplicationController
   # GET /recipes.json
   def index
     @recipes = Recipe.all
+    render json: RecipeSerializer.new(@recipes).serialized_json
   end
 
   # GET /recipes/1

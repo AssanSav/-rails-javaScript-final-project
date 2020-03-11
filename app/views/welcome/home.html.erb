@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=
-    , initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
     <div class="ph4" id="root">
         <input type="hidden" id="signed_in" value="<%= user_signed_in? %>" />
     </div>
+    <%= javascript_pack_tag 'recipes' %>
 </body>
 </html>
