@@ -10,3 +10,17 @@ class Recipe {
         this.user_id = user_id
     }
 }
+
+
+class Api {
+    static fetchRecipes() {
+        return fetch(`${BASE_URL}/recipes`)
+            .then(resp => resp.json())
+            .then(({ data }) => {
+                return data.map(({ id, attributes: { image, name, directions, user_id } }) => {
+                    return { id, image, name, directions, user_id }
+                })
+            })
+
+    }
+}
