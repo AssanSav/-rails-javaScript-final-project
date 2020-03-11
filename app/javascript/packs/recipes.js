@@ -9,6 +9,19 @@ class Recipe {
         this.directions = directions
         this.user_id = user_id
     }
+
+    static getAllRecipesFromPromise() {
+        if (Recipe.all.length === 0) {
+            return Api.fetchRecipes().then(recipes => {
+                Recipe.all = recipes.map(attributes =>
+                    new Recipe(attributes)
+                )
+                return Recipe.all
+            })
+        } else {
+            return Promise.resolve(Recipe.all)
+        }
+    }
 }
 
 
