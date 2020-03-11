@@ -86,11 +86,47 @@ document.addEventListener("DOMContentLoaded", () => {
                 let div = document.createElement("div")
                 div.dataset["recipeid"] = id
                 div.innerHTML =     `<img src="${image_url}" alt="">
-                                    <h4>${name}</h4>
-                                    <button id="details">More Details</button>`
+                                     <h4>${name}</h4>
+                                     <button id="details">More Details</button>`
                 root.appendChild(div)
             })
         })
     }
     renderRecipesIndex()
+
+    document.addEventListener("click", (e) => {
+        if (e.target.innerHTML === "More Details") {
+            let parentDiv = e.target.parentElement
+            Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(data => {
+                parentDiv.innerHTML = ` <img src="${data["image_url"]}" alt="">
+                                        <h4>${data["name"]}</h4>
+                                        <h4>Ingredients</h4>
+                                        <p>${data["ingredients"]}</p>
+                                        <h4>Directions</h4>
+                                        <p>${data["directions"]}</p>
+                                        `
+                // data["comments"].forEach(({ content }) => {
+                //     let divReviews = document.createElement("div")
+                //     divReviews.id = "comments"
+                //     if (content) {
+                //         divReviews.innerHTML = `<h3>Reviews</h3>
+                //                                 <p>${content}</p>
+                //                                 <button id="details">Back</button>`
+                //         parentDiv.appendChild(divReviews)
+                //     }
+
+                // })
+            })
+         } //else if (e.target.innerHTML === "Back") {
+        //     let root = document.getElementById("root")
+        //     root.innerHTML = renderRecipesIndex()
+        // }
+    })
+
+    // document.addEventListener("submit", (e) => {
+    //     e.preventDefault()
+    //     if (e.target.innerHTML = "Add Recipe") {
+    //         debugger
+    //     }
+    // })
 })
