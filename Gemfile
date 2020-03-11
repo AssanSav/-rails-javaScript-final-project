@@ -56,3 +56,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem "devise", "~> 4.7"
 
 gem "fast_jsonapi", "~> 1.5"
+
+
+
+gem "pry", "~> 0.12.2"

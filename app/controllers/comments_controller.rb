@@ -1,16 +1,21 @@
 class CommentsController < ApplicationController
-  before_action :set_comment, only: [:show, :edit, :update, :destroy]
+  before_action :set_comment, only: [ :edit, :update, :destroy]
 
   # GET /comments
   # GET /comments.json
   def index
+    # binding.pry
     @comments = Comment.all
-    render json: CommentsController.new(@comment).serialized_json
+    render json: CommentSerializer.new(@comment).serialized_json
   end
 
   # GET /comments/1
   # GET /comments/1.json
   def show
+    recipe = Recipe.find(params[:recipe_id])
+    if recipe
+      render json: CommentSerializer.new(@comment).serialized_json
+    end
   end
 
   # GET /comments/new

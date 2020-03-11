@@ -11,6 +11,9 @@ class RecipesController < ApplicationController
   # GET /recipes/1
   # GET /recipes/1.json
   def show
+    option = {}
+    option[:include] = [:comments, :'comments.content', :'user_id']
+    render json: RecipeSerializer.new(@recipe, option).serialized_json
   end
 
   # GET /recipes/new

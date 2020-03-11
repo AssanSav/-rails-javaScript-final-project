@@ -37,7 +37,44 @@ class Api {
             })
 
     }
+
+    static fetchRecipeShow(recipe_id) {
+        return fetch(`${BASE_URL}/recipes/${recipe_id}`)
+            .then(resp => resp.json())
+            .then(json => {
+                const {
+                    data: {
+                        id,
+                        attributes: {
+                            image_url,
+                            name,
+                            ingredients,
+                            directions,
+                            user_id
+                        }
+                    },
+                    included
+                } = json
+                return {
+                    id,
+                    image_url,
+                    name,
+                    ingredients,
+                    directions,
+                    user_id,
+                    comments: included.map(({ id, attributes: { content, recipe_id, user_id } }) => {
+                        return {
+                            id,
+                            user_id,
+                            recipe_id,
+                            content
+                        }
+                    })
+                }
+            })
+    }
 }
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
