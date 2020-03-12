@@ -23,23 +23,35 @@ class Recipe {
         }
     }
 
+    static createRecipeFromPromise(recipeAttributes) {
+        return Api.fetchToCreateRecipes(recipeAttributes)
+            .then(json => {
+                return new Recipe(json).save
+            })
+    }
+
+    save() {
+        Recipe.all.push(this)
+        return this 
+    }
+
     static renderForm() {
         let recipeSection = document.querySelector(".addRecipe")
         recipeSection.innerHTML = `
                                     <form >
                                         <p>
-                                            <label for="">Name</label>
-                                            <input type="text" name="name" id="recipe_name">
+                                            <input type="text" name="name" id="recipe_name" placeholder="Name">
                                         </p>
                                         <p>
-                                            <label for="">Image</label>
-                                            <input type="text" name="image" id="image">
+                                            <input type="text" name="image_url" id="image_url" placeholder="Image Url">
                                         </p>
                                         <p>
-                                            <label for="">Directions</label>
-                                            <input type="text" name="directions" id="directions">
+                                            <textarea name="directions" id="directions" cols="30" rows="10" placeholder="Directions"></textarea>
                                         </p>
-                                        <input type="submit" value="Add Recipe">
+                                        <p>
+                                            <textarea name="ingredients" id="ingredients" cols="30" rows="10" placeholder="Ingredients"></textarea>
+                                        </p>
+                                        <input type="submit" value="Add Recipe" >
                                     </form>
                                     `
         return recipeSection
@@ -114,6 +126,8 @@ class Api {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    Recipe.renderForm()
+
     function renderRecipesIndex() {
         Recipe.getAllRecipesFromPromise()
         let root = document.getElementById("root")
