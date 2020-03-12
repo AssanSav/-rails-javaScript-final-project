@@ -73,6 +73,19 @@ class Api {
                 }
             })
     }
+
+    static fetchToCreateRecipes(recipeAttributes) {
+        return fetch(`${BASE_URL}/recipes`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(recipeAttributes)
+        })
+            .then(resp => resp.json())
+    }
+
 }
 
 
@@ -104,23 +117,23 @@ document.addEventListener("DOMContentLoaded", () => {
                                         <p>${data["ingredients"]}</p>
                                         <h4>Directions</h4>
                                         <p>${data["directions"]}</p>
+                                        <h3>Reviews</h3>
                                         `
                 data["comments"].forEach(({ content }) => {
                     let divReviews = document.createElement("div")
                     divReviews.id = "comments"
                     if (content) {
-                        divReviews.innerHTML = `<h3>Reviews</h3>
-                                                <p>${content}</p>
+                        divReviews.innerHTML = `<p>${content}</p>
                                                 <button id="details">Back</button>`
                         parentDiv.appendChild(divReviews)
                     }
 
                 })
             })
-         } //else if (e.target.innerHTML === "Back") {
-        //     let root = document.getElementById("root")
-        //     root.innerHTML = renderRecipesIndex()
-        // }
+         } else if (e.target.innerHTML === "Back") {
+            let root = document.getElementById("root")
+            root.innerHTML = renderRecipesIndex()
+        }
     })
 
     // document.addEventListener("submit", (e) => {
