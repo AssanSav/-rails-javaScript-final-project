@@ -105,17 +105,17 @@ document.addEventListener("DOMContentLoaded", () => {
                                         <h4>Directions</h4>
                                         <p>${data["directions"]}</p>
                                         `
-                // data["comments"].forEach(({ content }) => {
-                //     let divReviews = document.createElement("div")
-                //     divReviews.id = "comments"
-                //     if (content) {
-                //         divReviews.innerHTML = `<h3>Reviews</h3>
-                //                                 <p>${content}</p>
-                //                                 <button id="details">Back</button>`
-                //         parentDiv.appendChild(divReviews)
-                //     }
+                data["comments"].forEach(({ content }) => {
+                    let divReviews = document.createElement("div")
+                    divReviews.id = "comments"
+                    if (content) {
+                        divReviews.innerHTML = `<h3>Reviews</h3>
+                                                <p>${content}</p>
+                                                <button id="details">Back</button>`
+                        parentDiv.appendChild(divReviews)
+                    }
 
-                // })
+                })
             })
          } //else if (e.target.innerHTML === "Back") {
         //     let root = document.getElementById("root")
