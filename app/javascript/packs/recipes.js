@@ -26,7 +26,7 @@ class Recipe {
     static createRecipeFromPromise(recipeAttributes) {
         return Api.fetchToCreateRecipes(recipeAttributes)
             .then(json => {
-                return new Recipe(json).save
+                return new Recipe(json).save()
             })
     }
 
@@ -38,7 +38,7 @@ class Recipe {
     static renderForm() {
         let recipeSection = document.querySelector(".addRecipe")
         recipeSection.innerHTML = `
-                                    <form >
+                                    <form class="addRecipe" >
                                         <p>
                                             <input type="text" name="name" id="recipe_name" placeholder="Name">
                                         </p>
@@ -51,7 +51,7 @@ class Recipe {
                                         <p>
                                             <textarea name="ingredients" id="ingredients" cols="30" rows="10" placeholder="Ingredients"></textarea>
                                         </p>
-                                        <input type="submit" value="Add Recipe" >
+                                        <input type="submit"  value="Add Recipe" >
                                     </form>
                                     `
         return recipeSection
@@ -114,7 +114,8 @@ class Api {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json",
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify(recipeAttributes)
         })
@@ -173,10 +174,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })
 
-    // document.addEventListener("submit", (e) => {
-    //     e.preventDefault()
-    //     if (e.target.innerHTML = "Add Recipe") {
-    //         debugger
-    //     }
-    // })
+    document.addEventListener("submit", (e) => {
+        e.preventDefault()
+        if (e.target.matches(".addRecipe")) {
+            let formData = {
+                name: e.target.querySelector("#recipe_name").value,
+                image_url: e.target.querySelector("#image_url").value,
+                ingredients: e.target.querySelector("#directions").value,
+                directions: e.target.querySelector("#ingredients").value
+            }
+            Recipe.createRecipeFromPromise(formData).then(data => {
+                let parentDiv = e.target.parentElement
+                parentDiv.innerHTML = ` <img src="${data["image_url"]}" alt="">
+                                        <h4>${data["name"]}</h4>
+                                        <h4>Ingredients</h4>
+                                        <p>${data["ingredients"]}</p>
+                                        <h4>Directions</h4>
+                                        <p>${data["directions"]}</p>
+                                        <h3>Reviews</h3>
+                                        `
+            })
+        }
+    })
 })
