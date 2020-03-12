@@ -22,7 +22,30 @@ class Recipe {
             return Promise.resolve(Recipe.all)
         }
     }
+
+    static renderForm() {
+        let recipeSection = document.querySelector(".addRecipe")
+        recipeSection.innerHTML = `
+                                    <form >
+                                        <p>
+                                            <label for="">Name</label>
+                                            <input type="text" name="name" id="recipe_name">
+                                        </p>
+                                        <p>
+                                            <label for="">Image</label>
+                                            <input type="text" name="image" id="image">
+                                        </p>
+                                        <p>
+                                            <label for="">Directions</label>
+                                            <input type="text" name="directions" id="directions">
+                                        </p>
+                                        <input type="submit" value="Add Recipe">
+                                    </form>
+                                    `
+        return recipeSection
+    }
 }
+
 Recipe.all = []
 
 
