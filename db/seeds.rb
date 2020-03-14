@@ -9,7 +9,7 @@ u = User.find_by(id: 1)
 
 r = u.recipes.create(image_url:"https://www.edamam.com/web-img/a8e/a8e6b4cd3856e78ad8f84f2a4d4ad8c3.jpg", name:"Beef & vegetable casserole", ingredients:" celery sticks, thickly sliced, 1 onion, chopped, 2 thyme sprigs, 1 whole and 1 leaves picked", directions:"Heat oven to 160C/140C fan/gas 3 and put the kettle on. Put 2 thickly sliced celery sticks, 1 chopped onion, 2 chunkily sliced carrots, 5 bay leaves and 1 whole thyme sprig in a flameproof casserole dish with 1 tbsp vegetable oil and 1 tbsp butter. Soften for 10 mins, then stir in 2 tbsp plain flour until it doesn’t look dusty anymore, followed by 2 tbsp tomato purée, 2 tbsp Worcestershire sauce and 2 crumbled beef stock cubes.Gradually stir in 600ml hot water, then tip in 850g stewing beef and bring to a gentle simmer.Cover and put in the oven for 2hrs 30 mins, then uncover and cook for 30mins – 1hr more until the meat is really tender and the sauce is thickened.Garnish with")
 
-c = r.comments.create(content: "I like it!!!")
+
 
 
 
@@ -28,4 +28,3 @@ In the same pan, fry 100g sliced smoked streaky bacon, 350g peeled shallots or p
 Mix in 1 tbsp tomato purée and cook for a few mins, stirring the mixture. This enriches the bourguignon and makes a great base for")
 
 
-c1 = r1.comments.create(content:"I will try that!!!!")

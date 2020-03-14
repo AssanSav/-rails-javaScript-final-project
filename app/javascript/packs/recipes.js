@@ -280,11 +280,11 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         } else if (e.target.matches(".addComment")) {
             e.preventDefault()
-            let form = {
+            let data = {
                 content: e.target.querySelector("#content").value,
                 recipe_id: e.target.querySelector("#recipe_id").value
             }
-            Comment.create(form).then(comment => {
+            Comment.create(data).then(comment => {
                 comment.render()
             })
         }
