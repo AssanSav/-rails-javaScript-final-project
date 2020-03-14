@@ -10,7 +10,7 @@ class Recipe {
         this.user_id = user_id
     }
 
-    static getAllRecipesFromPromise() {
+    static getAllRecipes() {
         if (Recipe.all.length === 0) {
             return Api.fetchRecipes().then(recipes => {
                 Recipe.all = recipes.map(attributes =>
@@ -23,7 +23,7 @@ class Recipe {
         }
     }
 
-    static createRecipeFromPromise(recipeAttributes) {
+    static create(recipeAttributes) {
         return Api.fetchToCreateRecipes(recipeAttributes)
             .then(json => {
                 return new Recipe(json).save()
@@ -33,6 +33,20 @@ class Recipe {
     save() {
         Recipe.all.push(this)
         return this 
+    }
+
+    static render(recipe) {
+        let root = document.getElementById("root")
+        root.innerHTML = ` <img src="${recipe["image_url"]}" alt="">
+                                        <h4>${recipe["name"]}</h4>
+                                        <h4>Ingredients</h4>
+                                        <p>${recipe["ingredients"]}</p>
+                                        <h4>Directions</h4>
+                                        <p>${recipe["directions"]}</p>
+                                        <h3>Reviews</h3>
+                                        <div id="form"></div>
+                                        `
+        return root.outerHTML
     }
 
     static renderForm() {
@@ -46,19 +60,62 @@ class Recipe {
                                             <input type="text" name="image_url" id="image_url" placeholder="Image Url">
                                         </p>
                                         <p>
-                                            <textarea name="directions" id="directions" cols="30" rows="10" placeholder="Directions"></textarea>
+                                            <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions"></textarea>
                                         </p>
                                         <p>
-                                            <textarea name="ingredients" id="ingredients" cols="30" rows="10" placeholder="Ingredients"></textarea>
+                                            <textarea name="ingredients" id="ingredients" cols="30" rows="5" placeholder="Ingredients"></textarea>
                                         </p>
                                         <input type="submit"  value="Add Recipe" >
                                     </form>
                                     `
-        return recipeSection
+    }
+
+    static findId(id) {
+        let found = Recipe.all.find(recipe => recipe.id == id)
+        return found
+    }
+
+    renderCommentForm() {
+        let form = document.getElementById("form")
+        form.innerHTML = `<form class="addComment">
+                            <input type="hidden" id="recipe_id" value="${this.id}">
+                            <input type="text" name="content" id="content"><br>
+                            <input type="submit" value="Add Comment">
+                         </form><br>
+                         <button id="back">Back</button>`
     }
 }
-
 Recipe.all = []
+
+
+class Comment {
+    constructor({ id, content, recipe_id, user_id }) {
+        this.id = id 
+        this.content = content
+        this.recipe_id = recipe_id
+        this.user_id = user_id
+    }
+
+    static create(commentAttributes) {
+        return Api.fetchToCreateComments(commentAttributes)
+            .then(json => {
+            return new Comment(json).save()
+        })
+    }
+
+    render() {
+        let div = document.getElementById("comments")
+        let p = document.createElement("p")
+        p.innerText = content.value
+        div.appendChild(p)
+    }
+
+    save() {
+        Comment.all.push(this)
+        return this
+    }
+}
+Comment.all = []
 
 
 class Api {
@@ -67,14 +124,21 @@ class Api {
             .then(resp => resp.json())
             .then(({ data }) => {
                 return data.map(({ id, attributes: { image_url, name, ingredients, directions, user_id } }) => {
-                    return { id, image_url, name, ingredients, directions, user_id }
+                    return {
+                        id,
+                        image_url,
+                        name,
+                        ingredients,
+                        directions,
+                        user_id
+                    }
                 })
             })
 
     }
 
-    static fetchRecipeShow(recipe_id) {
-        return fetch(`${BASE_URL}/recipes/${recipe_id}`)
+    static fetchRecipeShow(id) {
+        return fetch(`${BASE_URL}/recipes/${id}`)
             .then(resp => resp.json())
             .then(json => {
                 const {
@@ -122,6 +186,38 @@ class Api {
             .then(resp => resp.json())
     }
 
+
+    static fetchToCreateComments(commentAttributes) {
+        return fetch(`${BASE_URL}/comments`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                comment: commentAttributes
+            })
+        })
+            .then(resp => resp.json())
+            .then(json => {
+                const {
+                    data: {
+                        id,
+                        attributes: {
+                            content,
+                            recipe_id
+                        }
+                    }
+                } = json
+                return {
+                    id, 
+                    content,
+                    recipe_id 
+                }
+            })
+    }
+
 }
 
 
@@ -130,13 +226,12 @@ document.addEventListener("DOMContentLoaded", () => {
     Recipe.renderForm()
 
     function renderRecipesIndex() {
-        Recipe.getAllRecipesFromPromise()
         let root = document.getElementById("root")
-        Recipe.getAllRecipesFromPromise().then(recipes => {
+        Recipe.getAllRecipes().then(recipes => {
             recipes.forEach(({ id, image_url, name, ingredients, user_id }) => {
                 let div = document.createElement("div")
                 div.dataset["recipeid"] = id
-                div.innerHTML =     `<img src="${image_url}" alt="">
+                div.innerHTML = `<img src="${image_url}" alt="">
                                      <h4>${name}</h4>
                                      <button id="details">More Details</button>`
                 root.appendChild(div)
@@ -147,52 +242,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("click", (e) => {
         if (e.target.innerHTML === "More Details") {
-            let parentDiv = e.target.parentElement
-            Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(data => {
-                parentDiv.innerHTML = ` <img src="${data["image_url"]}" alt="">
-                                        <h4>${data["name"]}</h4>
-                                        <h4>Ingredients</h4>
-                                        <p>${data["ingredients"]}</p>
-                                        <h4>Directions</h4>
-                                        <p>${data["directions"]}</p>
-                                        <h3>Reviews</h3>
-                                        `
-                data["comments"].forEach(({ content }) => {
-                    let divReviews = document.createElement("div")
-                    divReviews.id = "comments"
-                    if (content) {
-                        divReviews.innerHTML = `<p>${content}</p>
-                                                <button id="details">Back</button>`
-                        parentDiv.appendChild(divReviews)
-                    }
-
-                })
-            })
-         } else if (e.target.innerHTML === "Back") {
             let root = document.getElementById("root")
+            Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(recipe => {
+                Recipe.render(recipe)
+                // debugger
+                Recipe.findId(recipe.id).renderCommentForm()
+                let divReviews = document.createElement("div")
+                divReviews.id = "comments"
+                recipe["comments"].forEach(({ content }) => {
+                    if (content) {
+                        let p = document.createElement("p")
+                        p.innerHTML = `<p>${content}</p>`
+                        divReviews.appendChild(p)
+                    }
+                })
+                root.appendChild(divReviews)
+            })
+        } else if (e.target.innerHTML === "Back") {
+            let root = e.target.parentElement.parentElement
             root.innerHTML = renderRecipesIndex()
         }
     })
 
     document.addEventListener("submit", (e) => {
-        e.preventDefault()
         if (e.target.matches(".addRecipe")) {
+            e.preventDefault()
             let formData = {
                 name: e.target.querySelector("#recipe_name").value,
                 image_url: e.target.querySelector("#image_url").value,
                 ingredients: e.target.querySelector("#directions").value,
                 directions: e.target.querySelector("#ingredients").value
             }
-            Recipe.createRecipeFromPromise(formData).then(data => {
-                let parentDiv = e.target.parentElement
-                parentDiv.innerHTML = ` <img src="${data["image_url"]}" alt="">
-                                        <h4>${data["name"]}</h4>
-                                        <h4>Ingredients</h4>
-                                        <p>${data["ingredients"]}</p>
-                                        <h4>Directions</h4>
-                                        <p>${data["directions"]}</p>
-                                        <h3>Reviews</h3>
-                                        `
+            Recipe.create(formData).then(recipe => {
+                if (recipe.id) {
+                    Recipe.render(recipe)
+                }
+            })
+        } else if (e.target.matches(".addComment")) {
+            e.preventDefault()
+            let form = {
+                content: e.target.querySelector("#content").value,
+                recipe_id: e.target.querySelector("#recipe_id").value
+            }
+            Comment.create(form).then(comment => {
+                comment.render()
             })
         }
     })

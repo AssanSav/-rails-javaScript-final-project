@@ -12,8 +12,11 @@
   <body>
 
     <nav>
-      <a href="/users/sign_in">Sign in</a>
-      <%= link_to "Log out", destroy_user_session_path, method: :delete %>
+      <% if user_signed_in? %>
+        <%= button_to('Logout', destroy_user_session_path, method: :delete) %>
+      <% else %>
+        <%= link_to('Login', new_user_session_path) %>
+      <% end %>
     </nav>
 
     <p class="notice"><%= notice %></p>
