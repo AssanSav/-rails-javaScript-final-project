@@ -187,6 +187,21 @@ class Api {
     }
 
 
+    static fetchToDelete(e) {
+        let recipeId = e.target.parentElement.dataset.recipeid
+        fetch(`${BASE_URL}/recipes/${recipeId}`, {
+            method: "DELETE",
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(resp => resp.json())
+            .then(json => {
+            e.target.parentElement.remove()
+        })
+    }
+
+
     static fetchToCreateComments(commentAttributes) {
         return fetch(`${BASE_URL}/comments`, {
             method: "POST",
@@ -228,13 +243,24 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderRecipesIndex() {
         let root = document.getElementById("root")
         Recipe.getAllRecipes().then(recipes => {
-            recipes.forEach(({ id, image_url, name, ingredients, user_id }) => {
+            let signedInInput = document.getElementById("user_signed_in?")
+            recipes.forEach(({ id, image_url, name, user_id }) => {
                 let div = document.createElement("div")
                 div.dataset["recipeid"] = id
-                div.innerHTML = `<img src="${image_url}" alt="">
+                
+                if (signedInInput && parseInt(signedInInput.value) === user_id) {
+                    div.innerHTML = `<img src="${image_url}" alt="">
+                                     <h4>${name}</h4>
+                                     <button class="delete">Delete</button>
+                                     <button id="details">More Details</button>`
+                    root.appendChild(div)  
+                } else {
+                    div.innerHTML = `<img src="${image_url}" alt="">
                                      <h4>${name}</h4>
                                      <button id="details">More Details</button>`
-                root.appendChild(div)
+                    root.appendChild(div)  
+                }
+                
             })
         })
     }
@@ -245,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
             let root = document.getElementById("root")
             Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(recipe => {
                 Recipe.render(recipe)
-                // debugger
                 Recipe.findId(recipe.id).renderCommentForm()
                 let divReviews = document.createElement("div")
                 divReviews.id = "comments"
@@ -261,6 +286,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (e.target.innerHTML === "Back") {
             let root = e.target.parentElement.parentElement
             root.innerHTML = renderRecipesIndex()
+        } else if (e.target.matches(".delete")) {
+            Api.fetchToDelete(e)
         }
     })
 
