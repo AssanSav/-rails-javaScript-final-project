@@ -50,8 +50,8 @@ class Recipe {
     }
 
     static renderForm() {
-        let recipeSection = document.querySelector(".addRecipe")
-        recipeSection.innerHTML = `
+        let recipeFormSection = document.querySelector(".container")
+        recipeFormSection.innerHTML = `
                                     <form class="addRecipe" >
                                         <p>
                                             <input type="text" name="name" id="recipe_name" placeholder="Name">
@@ -106,7 +106,12 @@ class Comment {
     render() {
         let div = document.getElementById("comments")
         let p = document.createElement("p")
-        p.innerText = content.value
+        p.dataset["commentid"] = this.id
+       p.innerHTML = `<span data-recipeid="${this.recipe_id}">
+                                        ${this.content}  
+                                        <button class="release">Delete<buton>
+                                        </span>
+                                       `
         div.appendChild(p)
     }
 
@@ -187,7 +192,7 @@ class Api {
     }
 
 
-    static fetchToDelete(e) {
+    static fetchToDeleteRecipe(e) {
         let recipeId = e.target.parentElement.dataset.recipeid
         fetch(`${BASE_URL}/recipes/${recipeId}`, {
             method: "DELETE",
@@ -233,6 +238,21 @@ class Api {
             })
     }
 
+
+    static fetchToDeleteComment(e) {
+        let recipeId = e.target.parentElement.dataset.recipeid
+        let commentId = e.target.parentElement.parentElement.dataset.commentid
+        fetch(`${BASE_URL}/recipes/${recipeId}/comments/${commentId}`, {
+            method: "DELETE",
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(resp => resp.json())
+            .then(json => {
+                e.target.parentElement.remove()
+        })
+    }
 }
 
 
@@ -247,7 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
             recipes.forEach(({ id, image_url, name, user_id }) => {
                 let div = document.createElement("div")
                 div.dataset["recipeid"] = id
-                
                 if (signedInInput && parseInt(signedInInput.value) === user_id) {
                     div.innerHTML = `<img src="${image_url}" alt="">
                                      <h4>${name}</h4>
@@ -271,13 +290,19 @@ document.addEventListener("DOMContentLoaded", () => {
             let root = document.getElementById("root")
             Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(recipe => {
                 Recipe.render(recipe)
+
                 Recipe.findId(recipe.id).renderCommentForm()
                 let divReviews = document.createElement("div")
                 divReviews.id = "comments"
-                recipe["comments"].forEach(({ content }) => {
+                recipe["comments"].forEach(comment => {
                     if (content) {
                         let p = document.createElement("p")
-                        p.innerHTML = `<p>${content}</p>`
+                        p.dataset["commentid"] = comment.id
+                        p.innerHTML = `<span data-recipeid="${comment.recipe_id}">
+                                        ${comment.content}  
+                                        <button class="release">Delete<buton>
+                                        </span>
+                                       `
                         divReviews.appendChild(p)
                     }
                 })
@@ -287,7 +312,9 @@ document.addEventListener("DOMContentLoaded", () => {
             let root = e.target.parentElement.parentElement
             root.innerHTML = renderRecipesIndex()
         } else if (e.target.matches(".delete")) {
-            Api.fetchToDelete(e)
+            Api.fetchToDeleteRecipe(e)
+        } else if (e.target.matches(".release")) {
+            Api.fetchToDeleteComment(e)
         }
     })
 
