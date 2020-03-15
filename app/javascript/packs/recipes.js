@@ -37,14 +37,15 @@ class Recipe {
 
     static render(recipe) {
         let root = document.getElementById("root")
-        root.innerHTML = ` <img src="${recipe["image_url"]}" alt="">
-                                        <h4>${recipe["name"]}</h4>
+        root.innerHTML = ` <img src="${recipe.image_url}" alt="">
+                                        <h4>${recipe.name}</h4>
                                         <h4>Ingredients</h4>
-                                        <p>${recipe["ingredients"]}</p>
+                                        <p>${recipe.ingredients}</p>
                                         <h4>Directions</h4>
-                                        <p>${recipe["directions"]}</p>
+                                        <p>${recipe.directions}</p>
                                         <h3>Reviews</h3>
                                         <div id="form"></div>
+                                        <button onclick="javascript:history.go()">Go Back</button>
                                         `
         return root.outerHTML
     }
@@ -60,14 +61,15 @@ class Recipe {
                                             <input type="text" name="image_url" id="image_url" placeholder="Image Url">
                                         </p>
                                         <p>
-                                            <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions"></textarea>
+                                            <textarea name="ingredients" id="ingredients" cols="30" rows="5" placeholder="Ingredients"></textarea>
                                         </p>
                                         <p>
-                                            <textarea name="ingredients" id="ingredients" cols="30" rows="5" placeholder="Ingredients"></textarea>
+                                            <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions"></textarea>
                                         </p>
                                         <input type="submit"  value="Add Recipe" >
                                     </form>
                                     `
+        
     }
 
     static findId(id) {
@@ -79,10 +81,10 @@ class Recipe {
         let form = document.getElementById("form")
         form.innerHTML = `<form class="addComment">
                             <input type="hidden" id="recipe_id" value="${this.id}">
-                            <input type="text" name="content" id="content"><br>
+                            <textarea name="content" id="content" cols="30" rows="5"></textarea>
                             <input type="submit" value="Add Comment">
                          </form><br>
-                         <button id="back">Back</button>`
+                         `
     }
 }
 Recipe.all = []
@@ -107,11 +109,11 @@ class Comment {
         let div = document.getElementById("comments")
         let p = document.createElement("p")
         p.dataset["commentid"] = this.id
-       p.innerHTML = `<span data-recipeid="${this.recipe_id}">
-                                        ${this.content}  
-                                        <button class="release">Delete<buton>
-                                        </span>
-                                       `
+        p.innerHTML = `<span data-recipeid="${this.recipe_id}">
+                        ${this.content}  
+                        <button class="release">Delete<buton>
+                        </span>
+                        `
         div.appendChild(p)
     }
 
@@ -192,6 +194,7 @@ class Api {
     }
 
 
+    
     static fetchToDeleteRecipe(e) {
         let recipeId = e.target.parentElement.dataset.recipeid
         fetch(`${BASE_URL}/recipes/${recipeId}`, {
@@ -258,20 +261,26 @@ class Api {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    Recipe.renderForm()
+    let root = document.getElementById("root")
+    let signedInInput = document.getElementById("user_signed_in?")
+
+    if (signedInInput) {
+        Recipe.renderForm()
+    }
 
     function renderRecipesIndex() {
-        let root = document.getElementById("root")
         Recipe.getAllRecipes().then(recipes => {
-            let signedInInput = document.getElementById("user_signed_in?")
+            
             recipes.forEach(({ id, image_url, name, user_id }) => {
                 let div = document.createElement("div")
                 div.dataset["recipeid"] = id
+                div.classList.add("recipesIndex")
                 if (signedInInput && parseInt(signedInInput.value) === user_id) {
                     div.innerHTML = `<img src="${image_url}" alt="">
                                      <h4>${name}</h4>
-                                     <button class="delete">Delete</button>
-                                     <button id="details">More Details</button>`
+                                     <button class="btn"><i class="fa fa-trash"></i></button>
+                                     <button id="update">Edit</button>
+                                     <button id="details">Details</button>`
                     root.appendChild(div)  
                 } else {
                     div.innerHTML = `<img src="${image_url}" alt="">
@@ -285,9 +294,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     renderRecipesIndex()
 
+
     document.addEventListener("click", (e) => {
-        if (e.target.innerHTML === "More Details") {
-            let root = document.getElementById("root")
+        if (e.target.innerHTML === "Details") {
             Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(recipe => {
                 Recipe.render(recipe)
 
@@ -308,13 +317,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 root.appendChild(divReviews)
             })
-        } else if (e.target.innerHTML === "Back") {
-            let root = e.target.parentElement.parentElement
-            root.innerHTML = renderRecipesIndex()
-        } else if (e.target.matches(".delete")) {
-            Api.fetchToDeleteRecipe(e)
+        } else if (e.target.matches(".btn")) {
+            if (confirm("Confirm")) {
+                Api.fetchToDeleteRecipe(e)
+            }     
         } else if (e.target.matches(".release")) {
             Api.fetchToDeleteComment(e)
+        } else if (e.target.matches("#update")) {
+            Api.fetchToUpdateRecipe(e)
         }
     })
 
@@ -330,6 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
             Recipe.create(formData).then(recipe => {
                 if (recipe.id) {
                     Recipe.render(recipe)
+                    document.querySelector(".addRecipe").reset()
                 }
             })
         } else if (e.target.matches(".addComment")) {
@@ -340,6 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             Comment.create(data).then(comment => {
                 comment.render()
+                e.target.querySelector("#content").value = ""
             })
         }
     })
