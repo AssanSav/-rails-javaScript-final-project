@@ -58,5 +58,6 @@ gem "devise", "~> 4.7"
 gem "fast_jsonapi", "~> 1.5"
 
 
-
 gem "pry", "~> 0.12.2"
+
+gem "typhoeus", "~> 1.3"
