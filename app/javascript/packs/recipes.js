@@ -1,11 +1,22 @@
 let BASE_URL = "http://localhost:3000"
 
 class Recipe {
-    constructor({ id, image_url, name, ingredients, directions, user_id }) {
+    constructor({ id, image_url, category, youtube, name, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, directions, user_id }) {
         this.id = id
         this.image_url = image_url
         this.name = name
-        this.ingredients = ingredients
+        this.category = category
+        this.youtube = youtube
+        this.ingredient1 = ingredient1
+        this.unit1 = unit1
+        this.ingredient2 = ingredient2
+        this.unit2
+        this.ingredient3 = ingredient3
+        this.unit3 = unit3
+        this.ingredient4 = ingredient4
+        this.unit4 = unit4
+        this.ingredient5 = ingredient5
+        this.unit5 = unit5
         this.directions = directions
         this.user_id = user_id
     }
@@ -40,12 +51,30 @@ class Recipe {
         root.innerHTML = ` <img src="${recipe.image_url}" alt="">
                                         <h4>${recipe.name}</h4>
                                         <h4>Ingredients</h4>
-                                        <p>${recipe.ingredients}</p>
+                                        <table>
+                                            <tr>
+                                                <th>${recipe.ingredient1}</th>
+                                                <th>${recipe.ingredient2}</th>
+                                                <th>${recipe.ingredient3}</th>
+                                                <th>${recipe.ingredient4}</th>
+                                                <th>${recipe.ingredient5}</th>
+                                                <th>${recipe.ingredient6}</th>
+                                            </tr>
+                                            <tr>
+                                                <td>${recipe.unit1}</td>
+                                                <td>${recipe.unit2}</td>
+                                                <td>${recipe.unit3}</td>
+                                                <td>${recipe.unit4}</td>
+                                                <td>${recipe.unit5}</td>
+                                                <td>${recipe.unit6}</td>
+                                            </tr>
+                                            <tr>
+                                        </table>
                                         <h4>Directions</h4>
                                         <p>${recipe.directions}</p>
                                         <h3>Reviews</h3>
                                         <div id="form"></div>
-                                        <button onclick="javascript:history.go()">Go Back</button>
+                                        <button class="go-back" onclick="javascript:history.go()">Go Back</button>
                                         `
         return root.outerHTML
     }
@@ -61,13 +90,38 @@ class Recipe {
                                             <input type="text" name="image_url" id="image_url" placeholder="Image Url">
                                         </p>
                                         <p>
-                                            <textarea name="ingredients" id="ingredients" cols="30" rows="5" placeholder="Ingredients"></textarea>
+                                            <input type="text" name="category" id="category" placeholder="Category">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="ingredient1" id="ingredient1" placeholder="Ingredient Name">
+                                            <input type="text" name="unit1" id="unit1" placeholder="Unit">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="ingredient2" id="ingredient2" placeholder="Ingredient Name">
+                                            <input type="text" name="unit2" id="unit2" placeholder="Unit">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="ingredient3" id="ingredient3" placeholder="Ingredient Name">
+                                            <input type="text" name="unit3" id="unit3" placeholder="Unit">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="ingredient4" id="ingredient4" placeholder="Ingredient Name">
+                                            <input type="text" name="unit4" id="unit4" placeholder="Unit">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="ingredient5" id="ingredient5" placeholder="Ingredient Name">
+                                            <input type="text" name="unit5" id="unit5" placeholder="Unit">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="ingredient6" id="ingredient6" placeholder="Ingredient Name">
+                                            <input type="text" name="unit6" id="unit6" placeholder="Unit">
                                         </p>
                                         <p>
                                             <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions"></textarea>
                                         </p>
-                                        <input type="submit"  value="Add Recipe" >
+                                        <input type="submit" class="create"  value="Add Recipe" >
                                     </form>
+                                    
                                     `
         
     }
@@ -130,12 +184,24 @@ class Api {
         return fetch(`${BASE_URL}/recipes`)
             .then(resp => resp.json())
             .then(({ data }) => {
-                return data.map(({ id, attributes: { image_url, name, ingredients, directions, user_id } }) => {
+                return data.map(({ id, attributes: { image_url, name, category, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, ingredient6, unit6, directions, user_id } }) => {
                     return {
                         id,
                         image_url,
                         name,
-                        ingredients,
+                        category,
+                        ingredient1,
+                        unit1,
+                        ingredient2,
+                        unit2,
+                        ingredient3,
+                        unit3,
+                        ingredient4,
+                        unit4,
+                        ingredient5,
+                        unit5,
+                        ingredient6,
+                        unit6,
                         directions,
                         user_id
                     }
@@ -154,7 +220,19 @@ class Api {
                         attributes: {
                             image_url,
                             name,
-                            ingredients,
+                            category,
+                            ingredient1,
+                            unit1,
+                            ingredient2,
+                            unit2,
+                            ingredient3,
+                            unit3,
+                            ingredient4,
+                            unit4,
+                            ingredient5,
+                            unit5,
+                            ingredient6,
+                            unit6,
                             directions,
                             user_id
                         }
@@ -165,7 +243,19 @@ class Api {
                     id,
                     image_url,
                     name,
-                    ingredients,
+                    category,
+                    ingredient1,
+                    unit1,
+                    ingredient2,
+                    unit2,
+                    ingredient3,
+                    unit3,
+                    ingredient4,
+                    unit4,
+                    ingredient5,
+                    unit5,
+                    ingredient6,
+                    unit6,
                     directions,
                     user_id,
                     comments: included.map(({ id, attributes: { content, recipe_id, user_id } }) => {
@@ -263,10 +353,8 @@ class Api {
 document.addEventListener("DOMContentLoaded", () => {
     let root = document.getElementById("root")
     let signedInInput = document.getElementById("user_signed_in?")
-
-    if (signedInInput) {
-        Recipe.renderForm()
-    }
+    let recipeForm = document.querySelector(".container") 
+    let container = document.querySelector(".addRecipes")
 
     function renderRecipesIndex() {
         Recipe.getAllRecipes().then(recipes => {
@@ -276,7 +364,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 div.dataset["recipeid"] = id
                 div.classList.add("recipesIndex")
                 if (signedInInput && parseInt(signedInInput.value) === user_id) {
-                    div.innerHTML = `<img src="${image_url}" alt="">
+                    div.innerHTML = `
+                                     <img src="${image_url}" alt="">
                                      <h4>${name}</h4>
                                      <button class="btn"><i class="fa fa-trash"></i></button>
                                      <button id="update">Edit</button>
@@ -317,14 +406,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 root.appendChild(divReviews)
             })
-        } else if (e.target.matches(".btn")) {
+        }
+        else if (e.target.matches(".btn")) {
             if (confirm("Confirm")) {
                 Api.fetchToDeleteRecipe(e)
             }     
-        } else if (e.target.matches(".release")) {
+        }
+        else if (e.target.matches(".release")) {
             Api.fetchToDeleteComment(e)
-        } else if (e.target.matches("#update")) {
+        }
+        else if (e.target.matches("#update")) {
             Api.fetchToUpdateRecipe(e)
+        }
+        else if (e.target.innerHTML === "Show Form" && signedInInput) {
+            Recipe.renderForm()
+            recipeForm.style.display = "block"
+            container.innerHTML = "Hide Form"
+        } 
+        else if (e.target.innerHTML === "Hide Form") {
+            container = "Show Form"
+            recipeForm.style.display  = "none"
         }
     })
 
@@ -333,9 +434,21 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault()
             let formData = {
                 name: e.target.querySelector("#recipe_name").value,
+                category: e.target.querySelector("#category").value,
                 image_url: e.target.querySelector("#image_url").value,
-                ingredients: e.target.querySelector("#directions").value,
-                directions: e.target.querySelector("#ingredients").value
+                ingredient: e.target.querySelector("#ingredient1").value,
+                unit: e.target.querySelector("#unit1").value,
+                ingredient: e.target.querySelector("#ingredient2").value,
+                unit: e.target.querySelector("#unit2").value,
+                ingredient: e.target.querySelector("#ingredient3").value,
+                unit: e.target.querySelector("#unit3").value,
+                ingredient: e.target.querySelector("#ingredient4").value,
+                unit: e.target.querySelector("#unit4").value,
+                ingredient: e.target.querySelector("#ingredient5").value,
+                unit: e.target.querySelector("#unit5").value,
+                ingredient: e.target.querySelector("#ingredient6").value,
+                unit: e.target.querySelector("#unit6").value,
+                directions: e.target.querySelector("#directions").value
             }
             Recipe.create(formData).then(recipe => {
                 if (recipe.id) {
