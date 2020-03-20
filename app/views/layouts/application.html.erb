@@ -18,8 +18,13 @@
       <% if user_signed_in? %>
       <%= button_to('Logout', destroy_user_session_path, method: :delete) %>
       <input type="hidden" id="user_signed_in?" value="<%= current_user.try(:id) %>" />
+      <% Comment.all.each do |comment| %>
+        <input type="hidden"  id="comment_user" value="<%= comment.user.username %>">
+      <% end %>
+      
       <% else %>
         <%= link_to('Login', new_user_session_path) %>
+        <%= link_to "Sign up", new_user_registration_path %>
       <% end %>
     </nav>
 

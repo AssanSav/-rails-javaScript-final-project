@@ -29,14 +29,9 @@ class RecipesController < ApplicationController
   # POST /recipes.json
   def create
     @recipe = current_user.recipes.build(recipe_params)
-    respond_to do |format|
-      if @recipe.save
-        format.html { redirect_to @recipe, notice: 'Recipe was successfully created.' }
-        format.json { render :show, status: :created, location: @recipe }
-      else
-        format.html { render :new }
-        format.json { render json: @recipe.errors, status: :unprocessable_entity }
-      end
+    # binding.pry
+    if @recipe.save
+        render json: RecipeSerializer.new(@recipe).serialized_json
     end
   end
 
@@ -58,9 +53,9 @@ class RecipesController < ApplicationController
   # DELETE /recipes/1.json
   def destroy
     @recipe = current_user.recipes.find(params[:id])
-    @recipes = Recipe.all
     if @recipe.destroy
-    render json: RecipeSerializer.new(@recipes).serialized_json
+    @recipes = Recipe.all
+    render json: RecipeSerializer.new(@recipe).serialized_json
     end
   end
 

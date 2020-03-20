@@ -30,6 +30,7 @@ class CommentsController < ApplicationController
   # POST /comments.json
   def create
     @comment = current_user.comments.build(comment_params)
+    # binding.pry
     if @comment.save 
       render json: CommentSerializer.new(@comment).serialized_json
     end
@@ -53,9 +54,9 @@ class CommentsController < ApplicationController
   # DELETE /comments/1.json
   def destroy
     # binding.pry
-    @recipe = Recipe.find(params[:recipe_id])
+    # @recipe = Recipe.find(params[:recipe_id])
     if @comment.destroy
-      render @recipe
+      render json: CommentSerializer.new(@comment).serialized_json
     end
   end
 
