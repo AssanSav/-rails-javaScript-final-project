@@ -1,16 +1,16 @@
 let BASE_URL = "http://localhost:3000"
 
 class Recipe {
-    constructor({ id, image_url, category, youtube, name, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, directions, user_id }) {
+    constructor({ id, image_url, category, name, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, directions, user_id, created_at,
+        updated_at}) {
         this.id = id
         this.image_url = image_url
         this.name = name
         this.category = category
-        this.youtube = youtube
         this.ingredient1 = ingredient1
         this.unit1 = unit1
         this.ingredient2 = ingredient2
-        this.unit2
+        this.unit2 = unit2
         this.ingredient3 = ingredient3
         this.unit3 = unit3
         this.ingredient4 = ingredient4
@@ -19,7 +19,10 @@ class Recipe {
         this.unit5 = unit5
         this.directions = directions
         this.user_id = user_id
+        this.created_at = created_at
+        this.updated_at = updated_at
     }
+
 
     static getAllRecipes() {
         if (Recipe.all.length === 0) {
@@ -34,57 +37,87 @@ class Recipe {
         }
     }
 
+
     static create(recipeAttributes) {
         return Api.fetchToCreateRecipes(recipeAttributes)
-            .then(json => {
-                return new Recipe(json).save()
+            .then(attributes => {
+                return new Recipe(attributes).save()
             })
     }
+
 
     save() {
         Recipe.all.push(this)
         return this 
     }
 
+
+    renderIndex() {
+        let signedInInput = document.getElementById("user_signed_in?")
+        let div = document.createElement("div")
+        div.dataset["recipeid"] = this.id
+        div.classList.add("recipesIndex")
+        if (signedInInput && parseInt(signedInInput.value) === this.user_id) {
+            div.innerHTML = `
+                            <img src="${this.image_url}" alt="">
+                            <h4 style="color: antiquewhite;">${this.name}</h4>
+                            <button class="btn"><i class="fa fa-trash"></i></button>
+                            <button id="details">Details</button>`
+            root.appendChild(div)
+        } else {
+            div.innerHTML = `<img src="${this.image_url}" alt="">
+                            <h4 id="myh4">${this.name}</h4>
+                            <button id="details">Details</button>`
+            root.appendChild(div)
+        }
+    }
+
+
     static render(recipe) {
         let root = document.getElementById("root")
+        root.dataset["recipeid"] = recipe.id
         root.innerHTML = ` <img src="${recipe.image_url}" alt="">
-                                        <h4>${recipe.name}</h4>
-                                        <h4>Ingredients</h4>
-                                        <table>
-                                            <tr>
-                                                <th>${recipe.ingredient1}</th>
-                                                <th>${recipe.ingredient2}</th>
-                                                <th>${recipe.ingredient3}</th>
-                                                <th>${recipe.ingredient4}</th>
-                                                <th>${recipe.ingredient5}</th>
-                                                <th>${recipe.ingredient6}</th>
-                                            </tr>
-                                            <tr>
-                                                <td>${recipe.unit1}</td>
-                                                <td>${recipe.unit2}</td>
-                                                <td>${recipe.unit3}</td>
-                                                <td>${recipe.unit4}</td>
-                                                <td>${recipe.unit5}</td>
-                                                <td>${recipe.unit6}</td>
-                                            </tr>
-                                            <tr>
-                                        </table>
-                                        <h4>Directions</h4>
-                                        <p>${recipe.directions}</p>
-                                        <h3>Reviews</h3>
-                                        <div id="form"></div>
-                                        <button class="go-back" onclick="javascript:history.go()">Go Back</button>
+                            <h4 id="myh4">${recipe.name}</h4>
+                            <h3 style="color: antiquewhite;">Ingredients</h3>
+                            <table>
+                                <tr>
+                                    <th>${recipe.ingredient1}</th>
+                                    <th>${recipe.ingredient2}</th>
+                                    <th>${recipe.ingredient3}</th>
+                                    <th>${recipe.ingredient4}</th>
+                                    <th>${recipe.ingredient5}</th>
+                                    <th>${recipe.ingredient6}</th>
+                                </tr>
+                                <tr>
+                                    <td>${recipe.unit1}</td>
+                                    <td>${recipe.unit2}</td>
+                                    <td>${recipe.unit3}</td>
+                                    <td>${recipe.unit4}</td>
+                                    <td>${recipe.unit5}</td>
+                                    <td>${recipe.unit6}</td>
+                                </tr>
+                                <tr>
+                            </table>
+                            <h4 style="color: antiquewhite;">Directions</h4>
+                            <p>${recipe.directions}</p>
+                            <button type="submit" class="update" data-id="${recipe.id}">Edit</button>
+                            <h3 style="color: antiquewhite;">Reviews</h3>
+                            <div id="form"></div>
+                            <button class="go-back" onclick="javascript:history.go()">Go Back</button>
                                         `
         return root.outerHTML
     }
 
+
     static renderForm() {
-        let recipeFormSection = document.querySelector(".container")
-        recipeFormSection.innerHTML = `
+        let recipeFormContainer = document.querySelector(".container")
+        recipeFormContainer.innerHTML = `
                                     <form class="addRecipe" >
                                         <p>
-                                            <input type="text" name="name" id="recipe_name" placeholder="Name">
+                                            <input type="hidden" name="user_id" id="user_id">
+                                        </p>
+                                        <p>
+                                            <input type="text" name="name" id="name" placeholder="Name">
                                         </p>
                                         <p>
                                             <input type="text" name="image_url" id="image_url" placeholder="Image Url">
@@ -126,22 +159,25 @@ class Recipe {
         
     }
 
-    static findId(id) {
+
+    static findById(id) {
         let found = Recipe.all.find(recipe => recipe.id == id)
         return found
     }
+
 
     renderCommentForm() {
         let form = document.getElementById("form")
         form.innerHTML = `<form class="addComment">
                             <input type="hidden" id="recipe_id" value="${this.id}">
                             <textarea name="content" id="content" cols="30" rows="5"></textarea>
-                            <input type="submit" value="Add Comment">
+                            <input type="submit" id="addComment" value="Add Comment">
                          </form><br>
                          `
     }
 }
 Recipe.all = []
+
 
 
 class Comment {
@@ -152,6 +188,7 @@ class Comment {
         this.user_id = user_id
     }
 
+
     static create(commentAttributes) {
         return Api.fetchToCreateComments(commentAttributes)
             .then(json => {
@@ -159,18 +196,20 @@ class Comment {
         })
     }
 
+
     render() {
         let div = document.getElementById("comments")
         let p = document.createElement("p")
-        p.dataset["commentid"] = this.id
-        p.innerHTML = `<span data-recipeid="${this.recipe_id}">
+        p.dataset["recipeid"] = this.recipe_id
+        p.innerHTML = `<span class="comment" data-commentid="${this.id}">
                         ${this.content}  
-                        <button class="release">Delete<buton>
+                        <button class="release"><i class="fa fa-trash"></i></button>
                         </span>
                         `
         div.appendChild(p)
     }
 
+    
     save() {
         Comment.all.push(this)
         return this
@@ -179,12 +218,14 @@ class Comment {
 Comment.all = []
 
 
+
 class Api {
     static fetchRecipes() {
         return fetch(`${BASE_URL}/recipes`)
             .then(resp => resp.json())
             .then(({ data }) => {
-                return data.map(({ id, attributes: { image_url, name, category, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, ingredient6, unit6, directions, user_id } }) => {
+                return data.map(({ id, attributes: { image_url, name, category, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, ingredient6, unit6, directions, user_id, created_at,
+                    updated_at } }) => {
                     return {
                         id,
                         image_url,
@@ -203,12 +244,15 @@ class Api {
                         ingredient6,
                         unit6,
                         directions,
-                        user_id
+                        user_id,
+                        created_at,
+                        updated_at
                     }
                 })
             })
 
     }
+
 
     static fetchRecipeShow(id) {
         return fetch(`${BASE_URL}/recipes/${id}`)
@@ -234,7 +278,9 @@ class Api {
                             ingredient6,
                             unit6,
                             directions,
-                            user_id
+                            user_id, 
+                            created_at,
+                            updated_at
                         }
                     },
                     included
@@ -258,6 +304,8 @@ class Api {
                     unit6,
                     directions,
                     user_id,
+                    created_at,
+                    updated_at,
                     comments: included.map(({ id, attributes: { content, recipe_id, user_id } }) => {
                         return {
                             id,
@@ -270,6 +318,7 @@ class Api {
             })
     }
 
+
     static fetchToCreateRecipes(recipeAttributes) {
         return fetch(`${BASE_URL}/recipes`, {
             method: "POST",
@@ -281,22 +330,67 @@ class Api {
             body: JSON.stringify(recipeAttributes)
         })
             .then(resp => resp.json())
+            .then(json => {
+                const {
+                    data: {
+                        id,
+                        attributes: {
+                            image_url,
+                            name,
+                            category,
+                            ingredient1,
+                            unit1,
+                            ingredient2,
+                            unit2,
+                            ingredient3,
+                            unit3,
+                            ingredient4,
+                            unit4,
+                            ingredient5,
+                            unit5,
+                            ingredient6,
+                            unit6,
+                            directions,
+                            user_id,
+                            created_at,
+                            updated_at
+                        }
+                    }
+                } = json
+                return {
+                    id,
+                    image_url,
+                    name,
+                    category,
+                    ingredient1,
+                    unit1,
+                    ingredient2,
+                    unit2,
+                    ingredient3,
+                    unit3,
+                    ingredient4,
+                    unit4,
+                    ingredient5,
+                    unit5,
+                    ingredient6,
+                    unit6,
+                    directions,
+                    user_id,
+                    created_at,
+                    updated_at
+                }
+        })
     }
 
 
-    
-    static fetchToDeleteRecipe(e) {
-        let recipeId = e.target.parentElement.dataset.recipeid
-        fetch(`${BASE_URL}/recipes/${recipeId}`, {
+    static fetchToDeleteRecipe(recipeId) {
+        return fetch(`${BASE_URL}/recipes/${recipeId}`, {
             method: "DELETE",
             headers: {
                 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
             }
         })
             .then(resp => resp.json())
-            .then(json => {
-            e.target.parentElement.remove()
-        })
     }
 
 
@@ -308,9 +402,7 @@ class Api {
                 "Accept": "application/json",
                 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({
-                comment: commentAttributes
-            })
+            body: JSON.stringify(commentAttributes)
         })
             .then(resp => resp.json())
             .then(json => {
@@ -332,73 +424,52 @@ class Api {
     }
 
 
-    static fetchToDeleteComment(e) {
-        let recipeId = e.target.parentElement.dataset.recipeid
-        let commentId = e.target.parentElement.parentElement.dataset.commentid
-        fetch(`${BASE_URL}/recipes/${recipeId}/comments/${commentId}`, {
+    static fetchToDeleteComment(recipeId, commentId) {
+        return fetch(`${BASE_URL}/recipes/${recipeId}/comments/${commentId}`, {
             method: "DELETE",
             headers: {
                 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
             }
         })
             .then(resp => resp.json())
-            .then(json => {
-                e.target.parentElement.remove()
-        })
     }
 }
 
 
-
 document.addEventListener("DOMContentLoaded", () => {
+    document.body.style.backgroundColor = "black"
+    document.body.style.backgroundImage = "url()"
+    
+    let comment_username = document.getElementById("comment_user").value
     let root = document.getElementById("root")
     let signedInInput = document.getElementById("user_signed_in?")
     let recipeForm = document.querySelector(".container") 
-    let container = document.querySelector(".addRecipes")
+    let formShow = document.querySelector(".formShow")
 
-    function renderRecipesIndex() {
         Recipe.getAllRecipes().then(recipes => {
-            
-            recipes.forEach(({ id, image_url, name, user_id }) => {
-                let div = document.createElement("div")
-                div.dataset["recipeid"] = id
-                div.classList.add("recipesIndex")
-                if (signedInInput && parseInt(signedInInput.value) === user_id) {
-                    div.innerHTML = `
-                                     <img src="${image_url}" alt="">
-                                     <h4>${name}</h4>
-                                     <button class="btn"><i class="fa fa-trash"></i></button>
-                                     <button id="update">Edit</button>
-                                     <button id="details">Details</button>`
-                    root.appendChild(div)  
-                } else {
-                    div.innerHTML = `<img src="${image_url}" alt="">
-                                     <h4>${name}</h4>
-                                     <button id="details">More Details</button>`
-                    root.appendChild(div)  
-                }
-                
+            let recipesSorted = recipes.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1)
+            recipesSorted.forEach(recipe => {
+                recipe.renderIndex()
             })
         })
-    }
-    renderRecipesIndex()
 
-
+    
     document.addEventListener("click", (e) => {
         if (e.target.innerHTML === "Details") {
             Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(recipe => {
                 Recipe.render(recipe)
-
-                Recipe.findId(recipe.id).renderCommentForm()
+                if (signedInInput) {
+                    Recipe.findById(recipe.id).renderCommentForm()
+                }
                 let divReviews = document.createElement("div")
                 divReviews.id = "comments"
-                recipe["comments"].forEach(comment => {
+                recipe.comments.forEach(comment => {
                     if (content) {
                         let p = document.createElement("p")
-                        p.dataset["commentid"] = comment.id
-                        p.innerHTML = `<span data-recipeid="${comment.recipe_id}">
-                                        ${comment.content}  
-                                        <button class="release">Delete<buton>
+                        p.dataset["recipeid"] = comment.recipe_id
+                        p.innerHTML = `<span class="comment" data-commentid="${comment.id}">
+                                        <h3 style="color: red;">${comment_username}</h3> ${comment.content}  
+                                        <button class="release"><i class="fa fa-trash"></i></button>
                                         </span>
                                        `
                         divReviews.appendChild(p)
@@ -406,55 +477,66 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 root.appendChild(divReviews)
             })
+        } else if (e.target.matches(".btn,.btn i")) {
+            let recipeId = e.target.parentElement.dataset.recipeid || e.target.parentElement.parentElement.dataset.recipeid
+            Api.fetchToDeleteRecipe(recipeId).then(json => {
+                if (confirm("Confirm")) {
+                    document.querySelector(`.recipesIndex[data-recipeid='${json.data.id}']`).remove()
+                }   
+            })       
         }
-        else if (e.target.matches(".btn")) {
-            if (confirm("Confirm")) {
-                Api.fetchToDeleteRecipe(e)
-            }     
-        }
-        else if (e.target.matches(".release")) {
-            Api.fetchToDeleteComment(e)
-        }
-        else if (e.target.matches("#update")) {
-            Api.fetchToUpdateRecipe(e)
+        else if (e.target.matches(".release,.release i")) {
+            let recipeId = e.target.parentElement.parentElement.dataset.recipeid || e.target.parentElement.parentElement.parentElement.dataset.recipeid
+            let commentId = e.target.parentElement.dataset.commentid || e.target.parentElement.parentElement.dataset.commentid
+            Api.fetchToDeleteComment(recipeId, commentId).then(json => {
+                document.querySelector(`.comment[data-commentid='${json.data.id}']`).remove()
+            })
         }
         else if (e.target.innerHTML === "Show Form" && signedInInput) {
             Recipe.renderForm()
             recipeForm.style.display = "block"
-            container.innerHTML = "Hide Form"
+            formShow.innerText = "Hide Form"
         } 
         else if (e.target.innerHTML === "Hide Form") {
-            container = "Show Form"
             recipeForm.style.display  = "none"
+            formShow.innerText = "Show Form"
+        }
+        else if (e.target.matches("#search")) {
+            let search = e.target.parentElement.querySelector("#inputSearch").value
+            let searchCapitalized = search.charAt(0).toUpperCase() + search.slice(1)
+            let results = Recipe.all.filter(recipe => recipe.name.includes(searchCapitalized))
+            root.innerHTML = ""
+            results.forEach(recipe => {
+                recipe.renderIndex()
+            })
         }
     })
+
 
     document.addEventListener("submit", (e) => {
         if (e.target.matches(".addRecipe")) {
             e.preventDefault()
             let formData = {
-                name: e.target.querySelector("#recipe_name").value,
+                name: e.target.querySelector("#name").value,
                 category: e.target.querySelector("#category").value,
                 image_url: e.target.querySelector("#image_url").value,
-                ingredient: e.target.querySelector("#ingredient1").value,
-                unit: e.target.querySelector("#unit1").value,
-                ingredient: e.target.querySelector("#ingredient2").value,
-                unit: e.target.querySelector("#unit2").value,
-                ingredient: e.target.querySelector("#ingredient3").value,
-                unit: e.target.querySelector("#unit3").value,
-                ingredient: e.target.querySelector("#ingredient4").value,
-                unit: e.target.querySelector("#unit4").value,
-                ingredient: e.target.querySelector("#ingredient5").value,
-                unit: e.target.querySelector("#unit5").value,
-                ingredient: e.target.querySelector("#ingredient6").value,
-                unit: e.target.querySelector("#unit6").value,
-                directions: e.target.querySelector("#directions").value
+                ingredient1: e.target.querySelector("#ingredient1").value,
+                unit1: e.target.querySelector("#unit1").value,
+                ingredient2: e.target.querySelector("#ingredient2").value,
+                unit2: e.target.querySelector("#unit2").value,
+                ingredient3: e.target.querySelector("#ingredient3").value,
+                unit3: e.target.querySelector("#unit3").value,
+                ingredient4: e.target.querySelector("#ingredient4").value,
+                unit4: e.target.querySelector("#unit4").value,
+                ingredient5: e.target.querySelector("#ingredient5").value,
+                unit5: e.target.querySelector("#unit5").value,
+                ingredient6: e.target.querySelector("#ingredient6").value,
+                unit6: e.target.querySelector("#unit6").value,
+                directions: e.target.querySelector("#directions").value,
             }
             Recipe.create(formData).then(recipe => {
-                if (recipe.id) {
-                    Recipe.render(recipe)
+                Recipe.render(recipe)
                     document.querySelector(".addRecipe").reset()
-                }
             })
         } else if (e.target.matches(".addComment")) {
             e.preventDefault()
@@ -466,6 +548,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 comment.render()
                 e.target.querySelector("#content").value = ""
             })
+        }
+    })
+
+    document.querySelector("#inputSearch").addEventListener("keyup", (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault()
+            document.getElementById("search").click();
         }
     })
 })
