@@ -55,7 +55,7 @@ input[type=submit]:hover {
 }
 
 #ingredients {
-    width: 100%;
+  width: 100%;
   padding: 5px 20px;
   margin: 8px 0;
   display: inline-block;
@@ -65,7 +65,7 @@ input[type=submit]:hover {
 }
 
 #content {
-      width: 100%;
+  width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
   display: inline-block;
@@ -107,8 +107,22 @@ div.recipesIndex img:hover {
   background-color: red;
 }
 
+.release {
+  background-color: gray; /* Blue background */
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  /* padding: 8px 10px; Some padding */
+  float: right;
+  font-size: 16px; /* Set a font size */
+  cursor: pointer; /* Mouse pointer on hover */
+}
+
+.release:hover {
+  background-color: red;
+}
+
 #details {
-     background-color: gray; /* Blue background */
+  background-color: gray; /* Blue background */
   border: none; /* Remove borders */
   color: white; /* White text */
   padding: 8px 10px; /* Some padding */
@@ -120,8 +134,8 @@ div.recipesIndex img:hover {
    background-color: green;
 }
 
-#update {
-        background-color: gray; /* Blue background */
+.update {
+  background-color: gray; /* Blue background */
   border: none; /* Remove borders */
   color: white; /* White text */
   padding: 8px 10px; /* Some padding */
@@ -129,11 +143,12 @@ div.recipesIndex img:hover {
   cursor: pointer; /* Mouse pointer on hover */
 }
 
-#update:hover {
+.update:hover {
     background-color: orange;
 } 
 
 table {
+  background-color: paleturquoise;
   font-family: arial, sans-serif;
   border-collapse: collapse;
   width: 100%;
@@ -149,7 +164,7 @@ tr:nth-child(even) {
   background-color: #dddddd;
 }
 
-.addRecipes {
+.formShow {
   position: relative;
   background-color: #e04b52;
   border: none;
@@ -161,7 +176,16 @@ tr:nth-child(even) {
   justify-self: center;
 }
 
-.addRecipes:hover {
+#search {
+  position: relative;
+  border: none;
+  border-radius: 2px;
+  width: max-content;
+  color: #e04b52;
+  font-size: 15px;
+}
+
+.formShow:hover {
   background-color: whitesmoke;
   border: #e04b52 solid 1px;
   color: #e04b52;
