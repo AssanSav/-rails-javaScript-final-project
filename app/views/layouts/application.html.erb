@@ -16,16 +16,14 @@
 
     <nav>
       <% if user_signed_in? %>
-      <%= button_to('Logout', destroy_user_session_path, method: :delete) %>
-      <input type="hidden" id="user_signed_in?" value="<%= current_user.try(:id) %>" />
-      <% Comment.all.each do |comment| %>
-        <input type="hidden"  id="comment_user" value="<%= comment.user.username %>">
-      <% end %>
+        <%= button_to('Logout', destroy_user_session_path, method: :delete) %>
+        <input type="hidden" id="user_signed_in?" value="<%= current_user.try(:username) %>" />
       
       <% else %>
-        <%= link_to('Login', new_user_session_path) %>
-        <%= link_to "Sign up", new_user_registration_path %>
+        <a class="login" href="/users/sign_in">Login</a>
+        <a class="signup" href="/users/sign_up">Sign up</a>
       <% end %>
+      <button class="go-back" onclick="javascript:history.go()">Home</button>
     </nav>
 
     <p class="notice"><%= notice %></p>
