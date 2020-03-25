@@ -1,8 +1,8 @@
 let BASE_URL = "http://localhost:3000"
 
 class Recipe {
-    constructor({ id, image_url, category, name, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, directions, user_id, created_at,
-        updated_at}) {
+    constructor({ id, image_url, category, name, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, ingredient6, unit6, directions, username, created_at,
+        updated_at }) {
         this.id = id
         this.image_url = image_url
         this.name = name
@@ -17,12 +17,13 @@ class Recipe {
         this.unit4 = unit4
         this.ingredient5 = ingredient5
         this.unit5 = unit5
+        this.ingredient6 = ingredient6
+        this.unit6 = unit6
         this.directions = directions
-        this.user_id = user_id
+        this.username = username
         this.created_at = created_at
         this.updated_at = updated_at
     }
-
 
     static getAllRecipes() {
         if (Recipe.all.length === 0) {
@@ -36,7 +37,6 @@ class Recipe {
             return Promise.resolve(Recipe.all)
         }
     }
-
 
     static create(recipeAttributes) {
         return Api.fetchToCreateRecipes(recipeAttributes)
@@ -57,108 +57,195 @@ class Recipe {
         let div = document.createElement("div")
         div.dataset["recipeid"] = this.id
         div.classList.add("recipesIndex")
-        if (signedInInput && parseInt(signedInInput.value) === this.user_id) {
-            div.innerHTML = `
-                            <img src="${this.image_url}" alt="">
-                            <h4 style="color: antiquewhite;">${this.name}</h4>
-                            <button class="btn"><i class="fa fa-trash"></i></button>
-                            <button id="details">Details</button>`
+        if (signedInInput && signedInInput.value == this.username) {
+            div.innerHTML = `<img src="${this.image_url}" alt="">
+                             <h4 style="color: antiquewhite;">${this.name}</h4>
+                             <button class="btn"><i class="fa fa-trash"></i></button>
+                             <button type="submit" class="update" data-id="${this.id}">Edit</button>
+                             <button id="details">Details</button>`
             root.appendChild(div)
         } else {
             div.innerHTML = `<img src="${this.image_url}" alt="">
-                            <h4 id="myh4">${this.name}</h4>
-                            <button id="details">Details</button>`
+                             <h4 style="color: antiquewhite;">${this.name}</h4>
+                             <button id="details">Details</button>`
             root.appendChild(div)
         }
     }
 
 
-    static render(recipe) {
-        let root = document.getElementById("root")
-        root.dataset["recipeid"] = recipe.id
-        root.innerHTML = ` <img src="${recipe.image_url}" alt="">
-                            <h4 id="myh4">${recipe.name}</h4>
-                            <h3 style="color: antiquewhite;">Ingredients</h3>
-                            <table>
-                                <tr>
-                                    <th>${recipe.ingredient1}</th>
-                                    <th>${recipe.ingredient2}</th>
-                                    <th>${recipe.ingredient3}</th>
-                                    <th>${recipe.ingredient4}</th>
-                                    <th>${recipe.ingredient5}</th>
-                                    <th>${recipe.ingredient6}</th>
-                                </tr>
-                                <tr>
-                                    <td>${recipe.unit1}</td>
-                                    <td>${recipe.unit2}</td>
-                                    <td>${recipe.unit3}</td>
-                                    <td>${recipe.unit4}</td>
-                                    <td>${recipe.unit5}</td>
-                                    <td>${recipe.unit6}</td>
-                                </tr>
-                                <tr>
-                            </table>
-                            <h4 style="color: antiquewhite;">Directions</h4>
-                            <p>${recipe.directions}</p>
-                            <button type="submit" class="update" data-id="${recipe.id}">Edit</button>
-                            <h3 style="color: antiquewhite;">Reviews</h3>
-                            <div id="form"></div>
-                            <button class="go-back" onclick="javascript:history.go()">Go Back</button>
-                                        `
-        return root.outerHTML
+    getDetails() {
+        if (this.comments().length === 0) {
+            return Api.fetchRecipeShow(this.id).then(({ comments }) => {
+                comments.map(commentAttributes => Comment.findOrCreate(commentAttributes))
+                return this
+            })
+        } else {
+            return Promise.resolve(this)
+        }
+    }
+
+
+    comments() {
+        return Comment.all.filter(comment => comment.recipe_id == this.id)
+    }
+
+    renderComments() {
+        let signedInInput = document.getElementById("user_signed_in?")
+        let divReviews = document.createElement("div")
+        divReviews.id = "comments"
+        this.comments().forEach(comment => {
+            let p = document.createElement("p")
+            p.dataset["recipeid"] = comment.recipe_id
+            if (signedInInput && signedInInput.value == comment.username) {
+                 p.innerHTML = `<div class="comment" data-commentid="${comment.id}">
+                                    <h3 id="user" style="color: red;">${comment.username}</h3> 
+                                    <p style="color: antiquewhite;">${comment.content}</p>
+                                    <button class="release"><i class="fa fa-trash"></i></button>
+                                </div>
+                                       `
+                divReviews.appendChild(p)
+            } else {
+                p.innerHTML = `<div class="comment" data-commentid="${comment.id}">
+                                    <h3 id="user" style="color: red;">${comment.username}</h3> 
+                                    <p style="color: antiquewhite;">${comment.content}</p>
+                                </div>
+                                       `
+                divReviews.appendChild(p)
+            }
+               
+        })
+        return divReviews.outerHTML
+    }
+    
+
+    render() {
+        return ` 
+                <img src="${this.image_url}" alt="">
+                <h4 style="color: yellow;">${this.name}</h4>
+                <h3 style="color: antiquewhite;">Ingredients</h3>
+                <table>
+                    <tr>
+                        <th>${this.ingredient1}</th>
+                        <th>${this.ingredient2}</th>
+                        <th>${this.ingredient3}</th>
+                        <th>${this.ingredient4}</th>
+                        <th>${this.ingredient5}</th>
+                        <th>${this.ingredient6}</th>
+                    </tr>
+                    <tr>
+                        <td>${this.unit1}</td>
+                        <td>${this.unit2}</td>
+                        <td>${this.unit3}</td>
+                        <td>${this.unit4}</td>
+                        <td>${this.unit5}</td>
+                        <td>${this.unit6}</td>
+                    </tr>
+                    <tr>
+                </table>
+                <h4 style="color: antiquewhite;">Directions</h4>
+                <p style="color: antiquewhite;">${this.directions}</p>
+                <h3 style="color: antiquewhite;">Reviews</h3>
+                ${this.renderComments()}
+                <div id="form"></div>`
     }
 
 
     static renderForm() {
-        let recipeFormContainer = document.querySelector(".container")
-        recipeFormContainer.innerHTML = `
-                                    <form class="addRecipe" >
-                                        <p>
-                                            <input type="hidden" name="user_id" id="user_id">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="name" id="name" placeholder="Name">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="image_url" id="image_url" placeholder="Image Url">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="category" id="category" placeholder="Category">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="ingredient1" id="ingredient1" placeholder="Ingredient Name">
-                                            <input type="text" name="unit1" id="unit1" placeholder="Unit">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="ingredient2" id="ingredient2" placeholder="Ingredient Name">
-                                            <input type="text" name="unit2" id="unit2" placeholder="Unit">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="ingredient3" id="ingredient3" placeholder="Ingredient Name">
-                                            <input type="text" name="unit3" id="unit3" placeholder="Unit">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="ingredient4" id="ingredient4" placeholder="Ingredient Name">
-                                            <input type="text" name="unit4" id="unit4" placeholder="Unit">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="ingredient5" id="ingredient5" placeholder="Ingredient Name">
-                                            <input type="text" name="unit5" id="unit5" placeholder="Unit">
-                                        </p>
-                                        <p>
-                                            <input type="text" name="ingredient6" id="ingredient6" placeholder="Ingredient Name">
-                                            <input type="text" name="unit6" id="unit6" placeholder="Unit">
-                                        </p>
-                                        <p>
-                                            <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions"></textarea>
-                                        </p>
-                                        <input type="submit" class="create"  value="Add Recipe" >
-                                    </form>
-                                    
-                                    `
+      return  `
+            <form class="addRecipe" >
+                <p>
+                    <input type="hidden" name="username" id="username">
+                </p>
+                <p>
+                    <input type="text" name="name" id="name" placeholder="Name">
+                </p>
+                <p>
+                    <input type="text" name="image_url" id="image_url" placeholder="Image Url">
+                </p>
+                <p>
+                    <input type="text" name="category" id="category" placeholder="Category">
+                </p>
+                <p>
+                    <input type="text" name="ingredient1" id="ingredient1" placeholder="Ingredient Name">
+                    <input type="text" name="unit1" id="unit1" placeholder="Unit">
+                </p>
+                <p>
+                    <input type="text" name="ingredient2" id="ingredient2" placeholder="Ingredient Name">
+                    <input type="text" name="unit2" id="unit2" placeholder="Unit">
+                </p>
+                <p>
+                    <input type="text" name="ingredient3" id="ingredient3" placeholder="Ingredient Name">
+                    <input type="text" name="unit3" id="unit3" placeholder="Unit">
+                </p>
+                <p>
+                    <input type="text" name="ingredient4" id="ingredient4" placeholder="Ingredient Name">
+                    <input type="text" name="unit4" id="unit4" placeholder="Unit">
+                </p>
+                <p>
+                    <input type="text" name="ingredient5" id="ingredient5" placeholder="Ingredient Name">
+                    <input type="text" name="unit5" id="unit5" placeholder="Unit">
+                </p>
+                <p>
+                    <input type="text" name="ingredient6" id="ingredient6" placeholder="Ingredient Name">
+                    <input type="text" name="unit6" id="unit6" placeholder="Unit">
+                </p>
+                <p>
+                    <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions"></textarea>
+                </p>
+                <input type="submit" class="create"  value="Add Recipe" >
+            </form>
+            
+            `
         
     }
 
+
+    renderUpdateForm() {  
+        return `
+            <form class="editRecipe" data-id="${this.id}">
+                <p>
+                    <input type="hidden" name="username" id="username">
+                </p>
+                <p>
+                    <input type="text" name="name" id="name" placeholder="Name" value="${this.name}">
+                </p>
+                <p>
+                    <input type="text" name="image_url" id="image_url" placeholder="Image Url" value="${this.image_url}">
+                </p>
+                <p>
+                    <input type="text" name="category" id="category" placeholder="Category" value="${this.category}">
+                </p>
+                <p>
+                    <input type="text" name="ingredient1" id="ingredient1" placeholder="Ingredient Name" value="${this.ingredient1}">
+                    <input type="text" name="unit1" id="unit1" placeholder="Unit" value="${this.unit1}">
+                </p>
+                <p>
+                    <input type="text" name="ingredient2" id="ingredient2" placeholder="Ingredient Name" value="${this.ingredient2}">
+                    <input type="text" name="unit2" id="unit2" placeholder="Unit" value="${this.unit2}">
+                </p>
+                <p>
+                    <input type="text" name="ingredient3" id="ingredient3" placeholder="Ingredient Name" value="${this.ingredient3}">
+                    <input type="text" name="unit3" id="unit3" placeholder="Unit" value="${this.unit3}">
+                </p>
+                <p>
+                    <input type="text" name="ingredient4" id="ingredient4" placeholder="Ingredient Name" value="${this.ingredient4}">
+                    <input type="text" name="unit4" id="unit4" placeholder="Unit" value="${this.unit4}">
+                </p>
+                <p>
+                    <input type="text" name="ingredient5" id="ingredient5" placeholder="Ingredient Name" value="${this.ingredient5}">
+                    <input type="text" name="unit5" id="unit5" placeholder="Unit" value="${this.unit5}">
+                </p>
+                <p>
+                    <input type="text" name="ingredient6" id="ingredient6" placeholder="Ingredient Name" value="${this.ingredient6}">
+                    <input type="text" name="unit6" id="unit6" placeholder="Unit" value="${this.unit6}">
+                </p>
+                <p>
+                    <textarea name="directions" id="directions" cols="30" rows="5" placeholder="Directions">${this.directions}</textarea>
+                </p>
+                <input type="submit" class="editedRecipe"  value="Edit Recipe" >
+            </form> 
+            `
+    }
 
     static findById(id) {
         let found = Recipe.all.find(recipe => recipe.id == id)
@@ -170,8 +257,8 @@ class Recipe {
         let form = document.getElementById("form")
         form.innerHTML = `<form class="addComment">
                             <input type="hidden" id="recipe_id" value="${this.id}">
-                            <textarea name="content" id="content" cols="30" rows="5"></textarea>
-                            <input type="submit" id="addComment" value="Add Comment">
+                            <textarea name="content" id="content" cols="30" rows="5"></textarea><br>
+                            <input type="submit" value="Add Comment">
                          </form><br>
                          `
     }
@@ -181,19 +268,23 @@ Recipe.all = []
 
 
 class Comment {
-    constructor({ id, content, recipe_id, user_id }) {
+    constructor({ id, content, recipe_id, username}) {
         this.id = id 
         this.content = content
+        this.username = username
         this.recipe_id = recipe_id
-        this.user_id = user_id
     }
-
 
     static create(commentAttributes) {
         return Api.fetchToCreateComments(commentAttributes)
-            .then(json => {
-            return new Comment(json).save()
+            .then(commentAttribute => {
+            return new Comment(commentAttribute).save()
         })
+    }
+
+    static findOrCreate(attributes) {
+        let found = Comment.all.find(comment => comment.id == attributes.id)
+        return found ? found : new Comment(attributes).save()
     }
 
 
@@ -201,10 +292,11 @@ class Comment {
         let div = document.getElementById("comments")
         let p = document.createElement("p")
         p.dataset["recipeid"] = this.recipe_id
-        p.innerHTML = `<span class="comment" data-commentid="${this.id}">
-                        ${this.content}  
-                        <button class="release"><i class="fa fa-trash"></i></button>
-                        </span>
+        p.innerHTML = `<div class="comment" data-commentid="${this.id}">
+                            <h3 id="user" style="color: red;">${this.username}</h3> 
+                            <p style="color: antiquewhite;">${this.content}</p>
+                            <button class="release"><i class="fa fa-trash"></i></button>
+                        </div>
                         `
         div.appendChild(p)
     }
@@ -224,7 +316,7 @@ class Api {
         return fetch(`${BASE_URL}/recipes`)
             .then(resp => resp.json())
             .then(({ data }) => {
-                return data.map(({ id, attributes: { image_url, name, category, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, ingredient6, unit6, directions, user_id, created_at,
+                return data.map(({ id, attributes: { image_url, name, category, ingredient1, unit1, ingredient2, unit2, ingredient3, unit3, ingredient4, unit4, ingredient5, unit5, ingredient6, unit6, directions, username, created_at,
                     updated_at } }) => {
                     return {
                         id,
@@ -244,7 +336,7 @@ class Api {
                         ingredient6,
                         unit6,
                         directions,
-                        user_id,
+                        username,
                         created_at,
                         updated_at
                     }
@@ -278,7 +370,7 @@ class Api {
                             ingredient6,
                             unit6,
                             directions,
-                            user_id, 
+                            username, 
                             created_at,
                             updated_at
                         }
@@ -303,15 +395,15 @@ class Api {
                     ingredient6,
                     unit6,
                     directions,
-                    user_id,
+                    username,
                     created_at,
                     updated_at,
-                    comments: included.map(({ id, attributes: { content, recipe_id, user_id } }) => {
+                    comments: included.map(({ id, attributes: { content, username, recipe_id} }) => {
                         return {
                             id,
-                            user_id,
-                            recipe_id,
-                            content
+                            content,
+                            username,
+                            recipe_id
                         }
                     })
                 }
@@ -351,7 +443,7 @@ class Api {
                             ingredient6,
                             unit6,
                             directions,
-                            user_id,
+                            username,
                             created_at,
                             updated_at
                         }
@@ -375,11 +467,75 @@ class Api {
                     ingredient6,
                     unit6,
                     directions,
-                    user_id,
+                    username,
                     created_at,
                     updated_at
                 }
+            })
+    }
+
+
+    static fetchToUpdateRecipes(recipe) {
+        return fetch(`${BASE_URL}/recipes/${recipe.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(recipe)
         })
+            .then(resp => resp.json())
+            .then(json => {
+                const {
+                    data: {
+                        id,
+                        attributes: {
+                            image_url,
+                            name,
+                            category,
+                            ingredient1,
+                            unit1,
+                            ingredient2,
+                            unit2,
+                            ingredient3,
+                            unit3,
+                            ingredient4,
+                            unit4,
+                            ingredient5,
+                            unit5,
+                            ingredient6,
+                            unit6,
+                            directions,
+                            username,
+                            created_at,
+                            updated_at
+                        }
+                    }
+                } = json
+                return {
+                    id,
+                    image_url,
+                    name,
+                    category,
+                    ingredient1,
+                    unit1,
+                    ingredient2,
+                    unit2,
+                    ingredient3,
+                    unit3,
+                    ingredient4,
+                    unit4,
+                    ingredient5,
+                    unit5,
+                    ingredient6,
+                    unit6,
+                    directions,
+                    username,
+                    created_at,
+                    updated_at
+                }
+            })
     }
 
 
@@ -411,6 +567,7 @@ class Api {
                         id,
                         attributes: {
                             content,
+                            username,
                             recipe_id
                         }
                     }
@@ -418,6 +575,7 @@ class Api {
                 return {
                     id, 
                     content,
+                    username,
                     recipe_id 
                 }
             })
@@ -436,15 +594,14 @@ class Api {
 }
 
 
+
 document.addEventListener("DOMContentLoaded", () => {
     document.body.style.backgroundColor = "black"
-    document.body.style.backgroundImage = "url()"
-    
-    let comment_username = document.getElementById("comment_user").value
+
     let root = document.getElementById("root")
+    let recipeFormContainer = document.querySelector(".container")
     let signedInInput = document.getElementById("user_signed_in?")
     let recipeForm = document.querySelector(".container") 
-    let formShow = document.querySelector(".formShow")
 
         Recipe.getAllRecipes().then(recipes => {
             let recipesSorted = recipes.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1)
@@ -456,26 +613,13 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.addEventListener("click", (e) => {
         if (e.target.innerHTML === "Details") {
-            Api.fetchRecipeShow(e.target.parentElement.dataset.recipeid).then(recipe => {
-                Recipe.render(recipe)
+            let recipe = Recipe.findById(e.target.parentElement.dataset.recipeid)
+            recipe.getDetails().then(recipe => {
+                root.dataset["recipeid"] = this.id
+                root.innerHTML = recipe.render()
                 if (signedInInput) {
                     Recipe.findById(recipe.id).renderCommentForm()
                 }
-                let divReviews = document.createElement("div")
-                divReviews.id = "comments"
-                recipe.comments.forEach(comment => {
-                    if (content) {
-                        let p = document.createElement("p")
-                        p.dataset["recipeid"] = comment.recipe_id
-                        p.innerHTML = `<span class="comment" data-commentid="${comment.id}">
-                                        <h3 style="color: red;">${comment_username}</h3> ${comment.content}  
-                                        <button class="release"><i class="fa fa-trash"></i></button>
-                                        </span>
-                                       `
-                        divReviews.appendChild(p)
-                    }
-                })
-                root.appendChild(divReviews)
             })
         } else if (e.target.matches(".btn,.btn i")) {
             let recipeId = e.target.parentElement.dataset.recipeid || e.target.parentElement.parentElement.dataset.recipeid
@@ -492,14 +636,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.querySelector(`.comment[data-commentid='${json.data.id}']`).remove()
             })
         }
-        else if (e.target.innerHTML === "Show Form" && signedInInput) {
-            Recipe.renderForm()
+        else if (e.target.innerHTML === "Create New Recipe" && signedInInput) {
+            recipeFormContainer.innerHTML = Recipe.renderForm()
             recipeForm.style.display = "block"
-            formShow.innerText = "Hide Form"
         } 
-        else if (e.target.innerHTML === "Hide Form") {
+        else if (e.target.matches(".create")) {
             recipeForm.style.display  = "none"
-            formShow.innerText = "Show Form"
+        }    
+        else if (e.target.matches(".update")) {
+            let recipe = Recipe.all.find(recipe => recipe.id == e.target.dataset.id)
+            recipeFormContainer.innerHTML = recipe.renderUpdateForm()
         }
         else if (e.target.matches("#search")) {
             let search = e.target.parentElement.querySelector("#inputSearch").value
@@ -535,8 +681,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 directions: e.target.querySelector("#directions").value,
             }
             Recipe.create(formData).then(recipe => {
-                Recipe.render(recipe)
-                    document.querySelector(".addRecipe").reset()
+                root.innerHTML = recipe.render()
+                document.querySelector(".addRecipe").reset()
             })
         } else if (e.target.matches(".addComment")) {
             e.preventDefault()
@@ -548,8 +694,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 comment.render()
                 e.target.querySelector("#content").value = ""
             })
-        }
+        } 
     })
+
 
     document.querySelector("#inputSearch").addEventListener("keyup", (e) => {
         if (e.keyCode === 13) {
@@ -558,3 +705,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })
 })
+
+ static update(recipe) {
+    return Api.fetchToUpdateRecipes(recipe).then(json => {
+        let updatedRecipe = new Recipe(json)
+        Recipe.all = Recipe.all.map(recipe => {
+            if (recipe.id === json.id) {
+                return updatedRecipe
+            } else {
+                return recipe
+            }
+        })
+        return updatedRecipe
+    })
+}
+
+
+
