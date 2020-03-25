@@ -10,15 +10,14 @@
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'recipes' %>
   </head>
 
   <body>
-
     <nav>
       <% if user_signed_in? %>
         <%= button_to('Logout', destroy_user_session_path, method: :delete) %>
         <input type="hidden" id="user_signed_in?" value="<%= current_user.try(:username) %>" />
-      
       <% else %>
         <a class="login" href="/users/sign_in">Login</a>
         <a class="signup" href="/users/sign_up">Sign up</a>
@@ -28,7 +27,6 @@
 
     <p class="notice"><%= notice %></p>
     <p class="alert"><%= alert %></p>
-    
     <%= yield %>
   </body>
 </html>
