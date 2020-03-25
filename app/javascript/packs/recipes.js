@@ -721,7 +721,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 unit6: e.target.querySelector("#unit6").value,
                 directions: e.target.querySelector("#directions").value,
             }
-            
+            Recipe.update(recipe.UpdateFormData).then(updatedRecipe => {
+                root.innerHTML = updatedRecipe.render()
+                document.querySelector(".container").style.display = "none"
+            })
         } else if (e.target.matches(".addComment")) {
             e.preventDefault()
             let data = {
