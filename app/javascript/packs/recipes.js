@@ -73,6 +73,21 @@ class Recipe {
     }
 
 
+    static update(recipe) {
+        return Api.fetchToUpdateRecipes(recipe).then(json => {
+            let updatedRecipe = new Recipe(json)
+            Recipe.all = Recipe.all.map(recipe => {
+                if (recipe.id === json.id) {
+                    return updatedRecipe
+                } else {
+                    return recipe
+                }
+            })
+            return updatedRecipe
+        })
+    }
+
+    
     getDetails() {
         if (this.comments().length === 0) {
             return Api.fetchRecipeShow(this.id).then(({ comments }) => {
@@ -684,6 +699,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 root.innerHTML = recipe.render()
                 document.querySelector(".addRecipe").reset()
             })
+        } else if (e.target.matches(".editRecipe")) {
+            e.preventDefault()
+            let recipe = Recipe.all.find(rec => rec.id == e.target.dataset.id)
+            recipe.UpdateFormData = {
+                id: e.target.dataset.id,
+                image_url: e.target.querySelector("#image_url").value,
+                name: e.target.querySelector("#name").value,
+                category: e.target.querySelector("#category").value,
+                ingredient1: e.target.querySelector("#ingredient1").value,
+                unit1: e.target.querySelector("#unit1").value,
+                ingredient2: e.target.querySelector("#ingredient2").value,
+                unit2: e.target.querySelector("#unit2").value,
+                ingredient3: e.target.querySelector("#ingredient3").value,
+                unit3: e.target.querySelector("#unit3").value,
+                ingredient4: e.target.querySelector("#ingredient4").value,
+                unit4: e.target.querySelector("#unit4").value,
+                ingredient5: e.target.querySelector("#ingredient5").value,
+                unit5: e.target.querySelector("#unit5").value,
+                ingredient6: e.target.querySelector("#ingredient6").value,
+                unit6: e.target.querySelector("#unit6").value,
+                directions: e.target.querySelector("#directions").value,
+            }
+            
         } else if (e.target.matches(".addComment")) {
             e.preventDefault()
             let data = {
@@ -706,19 +744,9 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 })
 
- static update(recipe) {
-    return Api.fetchToUpdateRecipes(recipe).then(json => {
-        let updatedRecipe = new Recipe(json)
-        Recipe.all = Recipe.all.map(recipe => {
-            if (recipe.id === json.id) {
-                return updatedRecipe
-            } else {
-                return recipe
-            }
-        })
-        return updatedRecipe
-    })
-}
+
+
+
 
 
 
