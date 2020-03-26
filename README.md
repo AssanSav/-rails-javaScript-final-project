@@ -29,4 +29,6 @@ then run `bundle install`
 - Go back to your browser and you should see new records of Recipes. 
 
 
+## NOTE.md in the root directory documents the APP functions
+
 
