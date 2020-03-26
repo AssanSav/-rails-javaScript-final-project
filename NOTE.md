@@ -58,7 +58,7 @@
 - In javaScript a class variable is defined outside of the class 
 
 
-# clas Api 
+# class Api 
 ## static fetchRecipes() 
 - `Fetches` the `${BASE_URL}/recipes` hits the `recipes index controller action` if resolved it will return a destrutured `promise` 
 
