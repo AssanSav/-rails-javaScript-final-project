@@ -57,6 +57,7 @@ class Recipe {
         let div = document.createElement("div")
         div.dataset["recipeid"] = this.id
         div.classList.add("recipesIndex")
+
         if (signedInInput && signedInInput.value == this.username) {
             div.innerHTML = `<img src="${this.image_url}" alt="">
                              <h4 style="color: antiquewhite;">${this.name}</h4>
@@ -76,6 +77,7 @@ class Recipe {
     static update(recipe) {
         return Api.fetchToUpdateRecipes(recipe).then(json => {
             let updatedRecipe = new Recipe(json)
+
             Recipe.all = Recipe.all.map(recipe => {
                 if (recipe.id === json.id) {
                     return updatedRecipe
@@ -611,8 +613,6 @@ class Api {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.body.style.backgroundColor = "black"
-
     let root = document.getElementById("root")
     let recipeFormContainer = document.querySelector(".container")
     let signedInInput = document.getElementById("user_signed_in?")
@@ -639,7 +639,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (e.target.matches(".btn,.btn i")) {
             let recipeId = e.target.parentElement.dataset.recipeid || e.target.parentElement.parentElement.dataset.recipeid
             Api.fetchToDeleteRecipe(recipeId).then(json => {
-                if (confirm("Confirm")) {
+                var result = confirm("Want to delete?");
+                if (result) {
                     document.querySelector(`.recipesIndex[data-recipeid='${json.data.id}']`).remove()
                 }   
             })       

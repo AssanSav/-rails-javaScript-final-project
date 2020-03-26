@@ -42,8 +42,7 @@ class RecipesController < ApplicationController
   def destroy
     @recipe = current_user.recipes.find(params[:id])
     if @recipe.destroy
-    @recipes = Recipe.all
-    render json: RecipeSerializer.new(@recipe).serialized_json
+     render json: RecipeSerializer.new(@recipe).serialized_json
     end
   end
 
