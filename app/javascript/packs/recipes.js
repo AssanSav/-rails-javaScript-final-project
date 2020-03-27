@@ -25,6 +25,7 @@ class Recipe {
         this.updated_at = updated_at
     }
 
+
     static getAllRecipes() {
         if (Recipe.all.length === 0) {
             return Api.fetchRecipes().then(recipes => {
@@ -77,7 +78,6 @@ class Recipe {
     static update(recipe) {
         return Api.fetchToUpdateRecipes(recipe).then(json => {
             let updatedRecipe = new Recipe(json)
-
             Recipe.all = Recipe.all.map(recipe => {
                 if (recipe.id === json.id) {
                     return updatedRecipe
@@ -91,6 +91,7 @@ class Recipe {
 
     
     getDetails() {
+        // 'use strict';
         if (this.comments().length === 0) {
             return Api.fetchRecipeShow(this.id).then(({ comments }) => {
                 comments.map(commentAttributes => Comment.findOrCreate(commentAttributes))
@@ -616,14 +617,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let root = document.getElementById("root")
     let recipeFormContainer = document.querySelector(".container")
     let signedInInput = document.getElementById("user_signed_in?")
-    let recipeForm = document.querySelector(".container") 
+    let recipeForm = document.querySelector(".container")
 
-        Recipe.getAllRecipes().then(recipes => {
-            let recipesSorted = recipes.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1)
-            recipesSorted.forEach(recipe => {
-                recipe.renderIndex()
-            })
+    Recipe.getAllRecipes().then(recipes => {
+        let recipesSorted = recipes.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1)
+        recipesSorted.forEach(recipe => {
+            recipe.renderIndex()
         })
+    })
 
     
     document.addEventListener("click", (e) => {
@@ -637,13 +638,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             })
         } else if (e.target.matches(".btn,.btn i")) {
-            let recipeId = e.target.parentElement.dataset.recipeid || e.target.parentElement.parentElement.dataset.recipeid
-            Api.fetchToDeleteRecipe(recipeId).then(json => {
-                var result = confirm("Want to delete?");
-                if (result) {
+            var result = confirm("Want to delete?");
+            if (result) {
+                let recipeId = e.target.parentElement.dataset.recipeid || e.target.parentElement.parentElement.dataset.recipeid
+                Api.fetchToDeleteRecipe(recipeId).then(json => {
                     document.querySelector(`.recipesIndex[data-recipeid='${json.data.id}']`).remove()
-                }   
-            })       
+                })
+            }     
         }
         else if (e.target.matches(".release,.release i")) {
             let recipeId = e.target.parentElement.parentElement.dataset.recipeid || e.target.parentElement.parentElement.parentElement.dataset.recipeid
