@@ -490,6 +490,9 @@ class Api {
                     updated_at
                 }
             })
+            .catch((error) => {
+            alert("Recipe name has to be present! Image URL has to be valid")
+        })
     }
 
 
@@ -554,6 +557,9 @@ class Api {
                     updated_at
                 }
             })
+            .catch((error) => {
+            alert("Invalid image URL")
+        })
     }
 
 
@@ -597,6 +603,9 @@ class Api {
                     recipe_id 
                 }
             })
+            .catch((error) => {
+            alert("Content can't be empty")
+        })
     }
 
 
@@ -628,6 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     
     document.addEventListener("click", (e) => {
+
         if (e.target.innerHTML === "Details") {
             let recipe = Recipe.findById(e.target.parentElement.dataset.recipeid)
             recipe.getDetails().then(recipe => {
@@ -647,11 +657,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }     
         }
         else if (e.target.matches(".release,.release i")) {
-            let recipeId = e.target.parentElement.parentElement.dataset.recipeid || e.target.parentElement.parentElement.parentElement.dataset.recipeid
-            let commentId = e.target.parentElement.dataset.commentid || e.target.parentElement.parentElement.dataset.commentid
-            Api.fetchToDeleteComment(recipeId, commentId).then(json => {
-                document.querySelector(`.comment[data-commentid='${json.data.id}']`).remove()
-            })
+            var result = confirm("Want to delete?");
+            if (result) {
+                let recipeId = e.target.parentElement.parentElement.dataset.recipeid || e.target.parentElement.parentElement.parentElement.dataset.recipeid
+                let commentId = e.target.parentElement.dataset.commentid || e.target.parentElement.parentElement.dataset.commentid
+                Api.fetchToDeleteComment(recipeId, commentId).then(json => {
+                    document.querySelector(`.comment[data-commentid='${json.data.id}']`).remove()
+                })
+            }      
         }
         else if (e.target.innerHTML === "Create New Recipe" && signedInInput) {
             recipeFormContainer.innerHTML = Recipe.renderForm()
