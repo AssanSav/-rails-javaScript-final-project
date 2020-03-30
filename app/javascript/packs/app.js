@@ -39,6 +39,7 @@ class Recipe {
         }
     }
 
+
     static create(recipeAttributes) {
         return Api.fetchToCreateRecipes(recipeAttributes)
             .then(attributes => {
@@ -58,7 +59,6 @@ class Recipe {
         let div = document.createElement("div")
         div.dataset["recipeid"] = this.id
         div.classList.add("recipesIndex")
-
         if (signedInInput && signedInInput.value == this.username) {
             div.innerHTML = `<img src="${this.image_url}" alt="">
                              <h4 style="color: antiquewhite;">${this.name}</h4>
@@ -106,6 +106,7 @@ class Recipe {
     comments() {
         return Comment.all.filter(comment => comment.recipe_id == this.id)
     }
+
 
     renderComments() {
         let signedInInput = document.getElementById("user_signed_in?")
@@ -265,6 +266,7 @@ class Recipe {
             `
     }
 
+    
     static findById(id) {
         let found = Recipe.all.find(recipe => recipe.id == id)
         return found
@@ -275,7 +277,7 @@ class Recipe {
         let form = document.getElementById("form")
         form.innerHTML = `<form class="addComment">
                             <input type="hidden" id="recipe_id" value="${this.id}">
-                            <textarea name="content" id="content" cols="30" rows="5"></textarea><br>
+                            <input name="content" id="content"></input><br>
                             <input type="submit" value="Add Comment">
                          </form><br>
                          `
@@ -293,6 +295,7 @@ class Comment {
         this.recipe_id = recipe_id
     }
 
+    
     static create(commentAttributes) {
         return Api.fetchToCreateComments(commentAttributes)
             .then(commentAttribute => {
@@ -647,8 +650,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     Recipe.findById(recipe.id).renderCommentForm()
                 }
             })
-        } else if (e.target.matches(".btn,.btn i")) {
-            var result = confirm("Want to delete?");
+        }
+        else if (e.target.matches(".btn,.btn i")) {
+            let result = confirm("Want to delete?");
             if (result) {
                 let recipeId = e.target.parentElement.dataset.recipeid || e.target.parentElement.parentElement.dataset.recipeid
                 Api.fetchToDeleteRecipe(recipeId).then(json => {
@@ -657,7 +661,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }     
         }
         else if (e.target.matches(".release,.release i")) {
-            var result = confirm("Want to delete?");
+            let result = confirm("Want to delete?");
             if (result) {
                 let recipeId = e.target.parentElement.parentElement.dataset.recipeid || e.target.parentElement.parentElement.parentElement.dataset.recipeid
                 let commentId = e.target.parentElement.dataset.commentid || e.target.parentElement.parentElement.dataset.commentid
@@ -760,6 +764,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("search").click();
         }
     })
+
 })
 
 
