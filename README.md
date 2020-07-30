@@ -7,18 +7,16 @@ This APP has users `authentications` via `devise gem` and to fully use the APP y
 ## Ruby version
 - ruby 2.6.1
 
-## Start
-- Fork and clone this repository
-
 ## System dependencies
-* Ensure those gems are in your Gemfile
-- gem "devise", "~> 4.7"
-- gem "fast_jsonapi", "~> 1.5"
-- gem "pry", "~> 0.12.2"
-- gem "typhoeus", "~> 1.3"
-- gem 'rails', '~> 6.0.2', '>= 6.0.2.1'
-then run `bundle install` 
-
+```
+gem "devise", "~> 4.7"
+gem "fast_jsonapi", "~> 1.5"
+gem "pry", "~> 0.12.2"
+gem "typhoeus", "~> 1.3"
+gem 'rails', '~> 6.0.2', '>= 6.0.2.1'
+```
+## Start
+- Fork and clone this repository and then run 
 
 ## Configuration
 - run `yarn install --check-files` to update yarn
